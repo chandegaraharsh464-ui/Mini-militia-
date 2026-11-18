@@ -5,114 +5,109 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#1a241b" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Doodle Outpost" />
-  <title>Doodle Army: Outpost Unlimited</title>
+  <title>Doodle Outpost — 9 Soldiers & 10 Weapons</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" id="appleIcon" href="" />
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 </head>
 <body>
-  <!-- LOBBY / MAIN MENU OVERLAY -->
+  <!-- LOBBY SCREEN -->
   <div id="lobbyScreen" class="overlay">
     <div class="lobby-card">
       <div class="lobby-header">
-        <div class="badge-unlimited">∞ UNLIMITED AMMO & JETPACK</div>
+        <div class="badge-unlimited">∞ UNLIMITED AMMO & JETPACK • MAX 6 PLAYERS</div>
         <h1>DOODLE OUTPOST</h1>
-        <p class="subtitle">Classic Jetpack Arena • PC & Mobile Cross-Play (Up to 6 Players)</p>
+        <p class="subtitle">9 Custom Soldiers • 10 Weapons & Gear • PC & Mobile Cross-Play</p>
       </div>
 
       <div class="player-setup">
-        <label>SOLDIER CALLSIGN</label>
-        <div class="row">
-          <input type="text" id="playerNameInput" maxlength="14" placeholder="Enter Name..." />
-          <select id="helmetColorSelect" title="Soldier Camo">
-            <option value="#4b633c">Forest Camo</option>
-            <option value="#3c5263">Navy Ops</option>
-            <option value="#7a4933">Desert Sand</option>
-            <option value="#363636">Black Ops</option>
-          </select>
-        </div>
+        <label>YOUR SOLDIER CALLSIGN</label>
+        <input type="text" id="playerNameInput" maxlength="14" placeholder="Enter your name..." />
       </div>
 
+      <!-- 9 CHARACTER SELECTOR -->
+      <div class="char-section">
+        <div class="section-title">CHOOSE YOUR SOLDIER (9 CHARACTERS)</div>
+        <div id="characterGrid" class="char-grid"></div>
+      </div>
+
+      <!-- TIMER PRESET & MULTIPLAYER / SOLO CONTROLS -->
       <div class="action-grid">
         <div class="panel">
-          <h3>🎮 HOST / SOLO MATCH</h3>
-          <button id="createRoomBtn" class="btn btn-green">CREATE MULTIPLAYER ROOM</button>
-          <button id="soloBotsBtn" class="btn btn-amber">PLAY VS BOTS (OFFLINE READY)</button>
+          <h3>🎮 HOST ROOM OR PLAY SOLO</h3>
+          <div class="timer-row">
+            <span>MATCH TIMER:</span>
+            <button type="button" id="lobbyTimeMinus" class="btn-sm">-1m</button>
+            <strong id="lobbyTimerDisplay">05:00</strong>
+            <button type="button" id="lobbyTimePlus" class="btn-sm">+1m</button>
+          </div>
+          <button id="createRoomBtn" class="btn btn-green">CREATE ROOM (UP TO 6 PLAYERS)</button>
+          <button id="soloBotsBtn" class="btn btn-amber">PRACTICE VS BOTS</button>
         </div>
 
         <div class="panel">
           <h3>🔗 JOIN FRIEND'S ROOM</h3>
           <div class="row">
-            <input type="text" id="roomCodeInput" maxlength="4" placeholder="CODE (e.g. K9X2)" style="text-transform:uppercase;" />
+            <input type="text" id="roomCodeInput" maxlength="4" placeholder="4-CHAR CODE" style="text-transform:uppercase;" />
             <button id="joinRoomBtn" class="btn btn-blue">JOIN</button>
           </div>
-          <div id="connectionStatus" class="status-text">Ready • P2P Wi-Fi / Internet</div>
+          <div id="connectionStatus" class="status-text">Exact joined players only (no extra bots in friend rooms)</div>
         </div>
       </div>
 
-      <!-- MULTIPLAYER LOBBY WAITING ROOM -->
+      <!-- WAITING ROOM -->
       <div id="waitingRoom" class="waiting-box hidden">
         <div class="room-banner">
           <div>
             <span class="label">ROOM CODE:</span>
             <strong id="displayRoomCode" class="code-text">----</strong>
+            <span id="roomCountBadge" class="count-badge">1 / 6 Players</span>
           </div>
           <div class="share-btns">
-            <button id="copyLinkBtn" class="btn-sm">📋 Copy Invite Link</button>
-            <button id="whatsappShareBtn" class="btn-sm btn-wa">💬 WhatsApp Invite</button>
+            <button id="copyLinkBtn" class="btn-sm">📋 Copy Link</button>
+            <button id="whatsappShareBtn" class="btn-sm btn-wa">💬 WhatsApp</button>
           </div>
         </div>
         <div id="lobbyPlayersList" class="players-list"></div>
-        <div class="row" style="margin-top:10px;">
+        <div class="row" style="margin-top:10px; justify-content:space-between;">
           <label class="checkbox-label">
-            <input type="checkbox" id="fillBotsCheck" checked /> Fill empty slots with AI Bots
+            <input type="checkbox" id="fillBotsCheck" /> Add AI Bots to fill 6 slots
           </label>
-          <button id="startMatchBtn" class="btn btn-green">🚀 START BATTLE</button>
+          <button id="startMatchBtn" class="btn btn-green">🚀 START MATCH</button>
         </div>
       </div>
 
-      <!-- SAVED FRIENDS & INSTALL GUIDE -->
       <div class="bottom-bar">
         <div class="friends-mini">
-          <strong>⭐ Saved Squad:</strong> <span id="savedFriendsList">None yet (add players in match)</span>
+          <strong>⭐ Saved Squad:</strong> <span id="savedFriendsList">None yet</span>
         </div>
         <button id="installAppBtn" class="btn-sm btn-install">📲 Install App (Android / iOS)</button>
       </div>
     </div>
   </div>
 
-  <!-- INSTALL MODAL FOR ANDROID & iOS -->
+  <!-- INSTALL GUIDE MODAL -->
   <div id="installModal" class="overlay hidden">
-    <div class="lobby-card" style="max-width:460px;">
-      <h2>📲 Install Doodle Outpost</h2>
-      <p style="font-size:13px;color:#cbd5c0;margin-bottom:12px;">Play fullscreen without browser bars on Android, iPhone, or PC:</p>
-      <div class="install-step">
-        <strong>🤖 Android (Chrome / Samsung Internet):</strong>
-        <p>Tap the <b>⋮ (3 dots)</b> menu in the top-right corner → Tap <b>"Add to Home screen"</b> or <b>"Install app"</b>.</p>
+    <div class="lobby-card" style="max-width:440px;">
+      <h2>📲 Install on Android & iOS</h2>
+      <div class="install-step" style="margin-top:10px;">
+        <strong>🤖 Android (Chrome):</strong> Tap <b>⋮ (3 dots)</b> → <b>Install app</b> or <b>Add to Home screen</b>.
       </div>
       <div class="install-step">
-        <strong>🍎 iPhone / iPad (Safari):</strong>
-        <p>Tap the <b>Share icon (⬆️)</b> at the bottom of Safari → Scroll down and tap <b>"Add to Home Screen"</b>.</p>
+        <strong>🍎 iPhone / iPad (Safari):</strong> Tap <b>Share (⬆️)</b> → <b>Add to Home Screen</b>.
       </div>
-      <div class="install-step">
-        <strong>💻 PC (Chrome / Edge):</strong>
-        <p>Click the <b>Install icon (⊕)</b> on the right side of the URL address bar.</p>
-      </div>
-      <button id="closeInstallModal" class="btn btn-green" style="width:100%;margin-top:10px;">GOT IT</button>
+      <button id="closeInstallModal" class="btn btn-green" style="width:100%;margin-top:8px;">CLOSE</button>
     </div>
   </div>
 
-  <!-- GAME CANVAS & HUD -->
+  <!-- GAMEPLAY CANVAS & HUD -->
   <div id="gameContainer" class="hidden">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- TOP HUD (Matches Concept Art) -->
     <div id="topHud">
       <div class="hud-left">
-        <div class="avatar-box" id="hudAvatar"></div>
+        <img id="hudAvatarImg" class="hud-char-img" src="" alt="Soldier" />
         <div class="bars-col">
           <div class="bar-wrap">
             <div id="healthBar" class="bar-fill hp-fill" style="width:100%;"></div>
@@ -124,51 +119,53 @@
           </div>
         </div>
         <div class="weapon-readout">
-          <div id="hudWeaponName">DUAL UZI</div>
-          <div id="hudAmmoText">∞ / ∞</div>
+          <div id="hudCharRole">DESERT MEDIC</div>
+          <div id="hudWeaponName">DUAL UZIS</div>
+          <div id="hudAmmoText">∞ AMMO</div>
         </div>
       </div>
 
+      <!-- EDITABLE LIVE TIMER (+/-) & PROXIMITY MIC TOGGLE -->
       <div class="hud-center">
-        <div id="matchTimer">05:00</div>
-        <div id="matchScore">KILLS: 0</div>
-        <button id="toggleScoreboardBtn" class="hud-mini-btn">👥 SQUAD / ADD FRIEND</button>
+        <div class="live-timer-box">
+          <button id="timeMinusBtn" class="t-btn" title="Decrease Time">-30s</button>
+          <span id="matchTimer">05:00</span>
+          <button id="timePlusBtn" class="t-btn" title="Increase Time">+30s</button>
+        </div>
+        <div id="matchScore">KILLS: 0 • PLAYERS: 1/6</div>
+        <div style="display:flex; gap:4px; justify-content:center; margin-top:3px;">
+          <button id="toggleScoreboardBtn" class="hud-mini-btn">👥 SQUAD</button>
+          <button id="toggleMicBtn" class="hud-mini-btn">🎙️ MIC: OFF</button>
+        </div>
       </div>
 
       <div class="hud-right" id="killFeed"></div>
     </div>
 
-    <!-- WEAPON QUICK BAR (PC & Touch Tap) -->
-    <div id="weaponSelectorBar">
-      <button class="w-slot active" data-w="0">1. DUAL UZI</button>
-      <button class="w-slot" data-w="1">2. DEAGLE</button>
-      <button class="w-slot" data-w="2">3. SNIPER</button>
-      <button class="w-slot" data-w="3">4. ROCKET</button>
-      <button class="w-slot" data-w="4">5. SHOTGUN</button>
-      <button class="w-slot" data-w="5">6. CHAINSAW</button>
-    </div>
+    <!-- ALL 10 WEAPONS & GEAR BAR -->
+    <div id="weaponSelectorBar"></div>
 
-    <!-- IN-MATCH SCOREBOARD & ADD FRIEND POPUP -->
+    <!-- SCOREBOARD & ADD FRIEND -->
     <div id="scoreboardModal" class="scoreboard-panel hidden">
       <div class="sb-header">
-        <strong>MATCH SCOREBOARD & ROOM: <span id="hudRoomCode">SOLO</span></strong>
+        <strong>SQUAD • ROOM: <span id="hudRoomCode">---</span></strong>
         <button id="closeSbBtn" class="btn-sm">✖</button>
       </div>
       <div id="scoreboardRows"></div>
       <button id="leaveMatchBtn" class="btn btn-red" style="width:100%;margin-top:10px;">EXIT TO LOBBY</button>
     </div>
 
-    <!-- MOBILE DUAL VIRTUAL JOYSTICKS & ACTION BUTTONS -->
+    <!-- MOBILE DUAL JOYSTICKS -->
     <div id="mobileControls">
       <div id="leftStickZone" class="stick-zone">
         <div class="stick-base"><div id="leftKnob" class="stick-knob"></div></div>
-        <span class="stick-hint">MOVE / FLY</span>
+        <span class="stick-hint">MOVE / JETPACK</span>
       </div>
 
       <div id="rightActionCluster">
         <button id="btnGrenade" class="action-circle btn-gas" title="Gas Grenade">☢️<small>∞</small></button>
         <button id="btnZoom" class="action-circle btn-zoom" title="Sniper Zoom">🔍</button>
-        <button id="btnSwap" class="action-circle btn-swap" title="Next Gun">🔄</button>
+        <button id="btnSwap" class="action-circle btn-swap" title="Next Weapon">🔄</button>
       </div>
 
       <div id="rightStickZone" class="stick-zone">
