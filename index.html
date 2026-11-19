@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1a241b" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Doodle Outpost" />
-  <title>Doodle Outpost — 9 Soldiers & 10 Weapons</title>
+  <title>Doodle Outpost — 10 Maps, 9 Soldiers & 10 Weapons</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
@@ -16,9 +16,9 @@
   <div id="lobbyScreen" class="overlay">
     <div class="lobby-card">
       <div class="lobby-header">
-        <div class="badge-unlimited">∞ UNLIMITED AMMO & JETPACK • MAX 6 PLAYERS</div>
+        <div class="badge-unlimited">∞ UNLIMITED AMMO, JETPACK & GRENADES • MAX 6 PLAYERS</div>
         <h1>DOODLE OUTPOST</h1>
-        <p class="subtitle">9 Custom Soldiers • 10 Weapons & Gear • PC & Mobile Cross-Play</p>
+        <p class="subtitle">10 Custom Maps • 9 Soldiers • 10 Weapons • Frag / Gas / Smoke Grenades</p>
       </div>
 
       <div class="player-setup">
@@ -32,12 +32,27 @@
         <div id="characterGrid" class="char-grid"></div>
       </div>
 
-      <!-- TIMER PRESET & MULTIPLAYER / SOLO CONTROLS -->
+      <!-- MAP SELECTOR, TIMER & MULTIPLAYER CONTROLS -->
       <div class="action-grid">
         <div class="panel">
-          <h3>🎮 HOST ROOM OR PLAY SOLO</h3>
+          <h3>🗺️ SELECT ARENA MAP & TIMER</h3>
           <div class="timer-row">
-            <span>MATCH TIMER:</span>
+            <span>MAP:</span>
+            <select id="mapSelect" style="flex:1; margin-left:6px; background:#243025; color:#fff; border:1px solid #566e54; padding:4px 6px; border-radius:5px; font-weight:800;">
+              <option value="0">1. Desert Outpost</option>
+              <option value="1">2. Underground Bunker</option>
+              <option value="2">3. Abandoned Scrapyard</option>
+              <option value="3">4. Jungle River Camp</option>
+              <option value="4">5. Catacombs Mine</option>
+              <option value="5">6. Arctic Snow Base</option>
+              <option value="6">7. Reactor Core</option>
+              <option value="7">8. Bio-Hazard Lab</option>
+              <option value="8">9. Mountain Helipad</option>
+              <option value="9">10. Maximum Prison</option>
+            </select>
+          </div>
+          <div class="timer-row">
+            <span>TIMER:</span>
             <button type="button" id="lobbyTimeMinus" class="btn-sm">-1m</button>
             <strong id="lobbyTimerDisplay">05:00</strong>
             <button type="button" id="lobbyTimePlus" class="btn-sm">+1m</button>
@@ -125,7 +140,7 @@
         </div>
       </div>
 
-      <!-- EDITABLE LIVE TIMER (+/-) & PROXIMITY MIC TOGGLE -->
+      <!-- EDITABLE LIVE TIMER (+/-), MAP NAME & MIC TOGGLE -->
       <div class="hud-center">
         <div class="live-timer-box">
           <button id="timeMinusBtn" class="t-btn" title="Decrease Time">-30s</button>
@@ -155,7 +170,7 @@
       <button id="leaveMatchBtn" class="btn btn-red" style="width:100%;margin-top:10px;">EXIT TO LOBBY</button>
     </div>
 
-    <!-- MOBILE DUAL JOYSTICKS -->
+    <!-- MOBILE DUAL JOYSTICKS & GRENADE TYPE SWITCHER -->
     <div id="mobileControls">
       <div id="leftStickZone" class="stick-zone">
         <div class="stick-base"><div id="leftKnob" class="stick-knob"></div></div>
@@ -163,7 +178,8 @@
       </div>
 
       <div id="rightActionCluster">
-        <button id="btnGrenade" class="action-circle btn-gas" title="Gas Grenade">☢️<small>∞</small></button>
+        <button id="btnGrenadeType" class="action-circle" style="border-color:#a3e635; font-size:10px;" title="Switch Grenade">FRAG<small>TYPE</small></button>
+        <button id="btnGrenade" class="action-circle btn-gas" title="Throw Grenade">💣<small>∞</small></button>
         <button id="btnZoom" class="action-circle btn-zoom" title="Sniper Zoom">🔍</button>
         <button id="btnSwap" class="action-circle btn-swap" title="Next Weapon">🔄</button>
       </div>
