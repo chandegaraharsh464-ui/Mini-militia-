@@ -302,7 +302,45 @@ const weaponAudios = WEAPONS.map((wp) => {
   a.preload = 'auto';
   return a;
 });
+let audioUnlocked = false;
+function unlockMobileAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  weaponAudios.forEach((a) => {
+    a.muted = true;
+    a.play().then(() => {
+      a.pause();
+      a.currentTime = 0;
+      a.muted = false;
+    }).catch(() => {});
+  });
+}
+window.addEventListener('touchstart', unlockMobileAudio, { once: true });
+window.addEventListener('click', unlockMobileAudio, { once: true });
 
+function playWeaponSound(shooter, weaponIdx) {
+  const baseAudio = weaponAudios[weaponIdx];
+  const me = state.players[state.myId];
+  if (!baseAudio) return;
+
+  let volume = 1.0;
+  if (me && shooter && shooter.id !== me.id) {
+    const dist = Math.hypot(shooter.x - me.x, shooter.y - me.y);
+    volume = Math.max(0, Math.min(1, 1 - dist / 1150));
+  }
+  if (volume <= 0.02) return;
+
+  // Use primary audio if idle, otherwise play a fresh Audio instance from the cached URL
+  if (baseAudio.paused) {
+    baseAudio.volume = volume;
+    baseAudio.currentTime = 0;
+    baseAudio.play().catch(() => {});
+  } else {
+    const clip = new Audio(baseAudio.src);
+    clip.volume = volume;
+    clip.play().catch(() => {});
+  }
+}
 function playWeaponSound(shooter, weaponIdx) {
   const baseAudio = weaponAudios[weaponIdx];
   const me = state.players[state.myId];
