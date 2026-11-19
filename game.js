@@ -1,5 +1,5 @@
 /* ==========================================================================
-   DOODLE OUTPOST — 10 ANALYZED MAPS, 9 CHARACTERS, 10 WEAPONS, 3 GRENADES & FX
+   DOODLE OUTPOST — STITCH TACTICAL UI, SETTINGS DRAWER, UTILITY CRATES & 10 MAPS
    ========================================================================== */
 
 if ('serviceWorker' in navigator) {
@@ -7,7 +7,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // ==========================================================================
-// 1. TRANSPARENT SPRITE LOADER (STRIPS PURE WHITE BACKGROUNDS)
+// 1. TRANSPARENT SPRITE LOADER
 // ==========================================================================
 function loadTransparentSprite(src, onReady) {
   const img = new Image();
@@ -21,9 +21,7 @@ function loadTransparentSprite(src, onReady) {
     const data = g.getImageData(0, 0, c.width, c.height);
     const d = data.data;
     for (let i = 0; i < d.length; i += 4) {
-      if (d[i] > 238 && d[i + 1] > 238 && d[i + 2] > 238) {
-        d[i + 3] = 0;
-      }
+      if (d[i] > 238 && d[i + 1] > 238 && d[i + 2] > 238) d[i + 3] = 0;
     }
     g.putImageData(data, 0, 0);
     onReady(c);
@@ -32,7 +30,7 @@ function loadTransparentSprite(src, onReady) {
 }
 
 // ==========================================================================
-// 2. 9 CHARACTERS, 10 WEAPONS, 3 GRENADES & VISUAL EFFECT SPRITES
+// 2. 9 SOLDIERS, 10 WEAPONS/CRATES, 3 GRENADES & FX SPRITES
 // ==========================================================================
 const CHARACTERS = [
   { id: 0, name: 'Desert Medic',  file: './assets/char1.png' },
@@ -47,22 +45,22 @@ const CHARACTERS = [
 ];
 
 const WEAPONS = [
-  { id: 0, name: 'RIOT SHIELD',  file: './assets/weap1.png',  sound: './sounds/w1_shield.mp3',     rate: 140, speed: 0,  damage: 18, spread: 0,    count: 1, color: '#38bdf8', type: 'shield' },
-  { id: 1, name: 'DUAL UZIS',    file: './assets/weap2.png',  sound: './sounds/w2_uzi.mp3',        rate: 85,  speed: 18, damage: 13, spread: 0.09, count: 2, color: '#facc15', type: 'bullet' },
-  { id: 2, name: 'DESERT EAGLE', file: './assets/weap3.png',  sound: './sounds/w3_deagle.mp3',     rate: 250, speed: 22, damage: 35, spread: 0.02, count: 1, color: '#fde047', type: 'bullet' },
-  { id: 3, name: 'SNIPER RIFLE', file: './assets/weap4.png',  sound: './sounds/w4_sniper.mp3',     rate: 620, speed: 34, damage: 85, spread: 0.00, count: 1, color: '#38bdf8', type: 'sniper' },
-  { id: 4, name: 'CHAINSAW',     file: './assets/weap5.png',  sound: './sounds/w5_chainsaw.mp3',   rate: 120, speed: 0,  damage: 25, spread: 0,    count: 1, color: '#ef4444', type: 'melee'  },
-  { id: 5, name: 'SHOTGUN',      file: './assets/weap6.png',  sound: './sounds/w6_shotgun.mp3',    rate: 500, speed: 17, damage: 16, spread: 0.24, count: 6, color: '#fef08a', type: 'bullet' },
-  { id: 6, name: 'ROCKET RPG',   file: './assets/weap7.png',  sound: './sounds/w7_rocket.mp3',     rate: 820, speed: 14, damage: 95, spread: 0.02, count: 1, color: '#fb923c', type: 'rocket' },
-  { id: 7, name: 'AMMO CRATE',   file: './assets/weap8.png',  sound: './sounds/w8_ammo_crate.mp3', rate: 320, speed: 16, damage: 28, spread: 0.14, count: 3, color: '#bef264', type: 'bullet' },
-  { id: 8, name: 'GEAR CRATE',   file: './assets/weap9.png',  sound: './sounds/w9_gear_crate.mp3', rate: 750, speed: 12, damage: 90, spread: 0.04, count: 1, color: '#f97316', type: 'rocket' },
-  { id: 9, name: 'MEDKIT BOX',   file: './assets/weap10.png', sound: './sounds/w10_medkit.mp3',    rate: 600, speed: 0,  damage: 0,  spread: 0,    count: 1, color: '#22c55e', type: 'heal'   }
+  { id: 0, name: 'RIOT SHIELD',  file: './assets/weap1.png',  sound: './sounds/w1_shield.mp3',     rate: 140,  speed: 0,  damage: 18, spread: 0,    count: 1, color: '#38bdf8', type: 'shield' },
+  { id: 1, name: 'DUAL UZIS',    file: './assets/weap2.png',  sound: './sounds/w2_uzi.mp3',        rate: 85,   speed: 18, damage: 13, spread: 0.09, count: 2, color: '#facc15', type: 'bullet' },
+  { id: 2, name: 'DESERT EAGLE', file: './assets/weap3.png',  sound: './sounds/w3_deagle.mp3',     rate: 250,  speed: 22, damage: 35, spread: 0.02, count: 1, color: '#fde047', type: 'bullet' },
+  { id: 3, name: 'SNIPER RIFLE', file: './assets/weap4.png',  sound: './sounds/w4_sniper.mp3',     rate: 620,  speed: 34, damage: 85, spread: 0.00, count: 1, color: '#38bdf8', type: 'sniper' },
+  { id: 4, name: 'CHAINSAW',     file: './assets/weap5.png',  sound: './sounds/w5_chainsaw.mp3',   rate: 120,  speed: 0,  damage: 25, spread: 0,    count: 1, color: '#ef4444', type: 'melee'  },
+  { id: 5, name: 'SHOTGUN',      file: './assets/weap6.png',  sound: './sounds/w6_shotgun.mp3',    rate: 500,  speed: 17, damage: 16, spread: 0.24, count: 6, color: '#fef08a', type: 'bullet' },
+  { id: 6, name: 'ROCKET RPG',   file: './assets/weap7.png',  sound: './sounds/w7_rocket.mp3',     rate: 820,  speed: 14, damage: 95, spread: 0.02, count: 1, color: '#fb923c', type: 'rocket' },
+  { id: 7, name: 'AMMO CRATE',   file: './assets/weap8.png',  sound: './sounds/w8_ammo_crate.mp3', rate: 1500, speed: 0,  damage: 0,  spread: 0,    count: 1, color: '#facc15', type: 'ammo_boost' },
+  { id: 8, name: 'GEAR CRATE',   file: './assets/weap9.png',  sound: './sounds/w9_gear_crate.mp3', rate: 1500, speed: 0,  damage: 0,  spread: 0,    count: 1, color: '#38bdf8', type: 'armor_boost' },
+  { id: 9, name: 'MEDKIT BOX',   file: './assets/weap10.png', sound: './sounds/w10_medkit.mp3',    rate: 900,  speed: 0,  damage: 0,  spread: 0,    count: 1, color: '#22c55e', type: 'heal' }
 ];
 
 const GRENADE_TYPES = [
-  { id: 0, label: 'FRAG',  name: 'FRAG GRENADE',  file: './assets/grenade_frag.png' },
-  { id: 1, label: 'GAS',   name: 'GREEN GAS',     file: './assets/grenade_gas.png' },
-  { id: 2, label: 'SMOKE', name: 'SMOKE SCREEN',  file: './assets/grenade_smoke.png' }
+  { id: 0, label: 'FRAG',  name: 'FRAG GRENADE', file: './assets/grenade_frag.png' },
+  { id: 1, label: 'GAS',   name: 'GREEN GAS',    file: './assets/grenade_gas.png' },
+  { id: 2, label: 'SMOKE', name: 'SMOKE SCREEN', file: './assets/grenade_smoke.png' }
 ];
 
 const FX_FILES = {
@@ -76,19 +74,14 @@ const FX_FILES = {
 };
 
 const PROP_FILES = {
-  bunker:    './assets/prop_bunker.png',
-  tower:     './assets/prop_tower.png',
-  crate:     './assets/prop_crate.png',
-  door:      './assets/prop_door.png',
-  sandbag:   './assets/prop_sandbag.png',
-  catwalk:   './assets/prop_catwalk.png',
-  pipes:     './assets/prop_pipes.png',
-  container: './assets/prop_container.png',
-  cave:      './assets/prop_cave.png'
+  bunker: './assets/prop_bunker.png', tower: './assets/prop_tower.png',
+  crate: './assets/prop_crate.png', door: './assets/prop_door.png',
+  sandbag: './assets/prop_sandbag.png', catwalk: './assets/prop_catwalk.png',
+  pipes: './assets/prop_pipes.png', container: './assets/prop_container.png',
+  cave: './assets/prop_cave.png'
 };
 
 const SPRITES = { chars: [], weapons: [], grenades: [], fx: {}, props: {} };
-
 CHARACTERS.forEach((ch, idx) => loadTransparentSprite(ch.file, (c) => { SPRITES.chars[idx] = c; }));
 WEAPONS.forEach((wp, idx) => loadTransparentSprite(wp.file, (c) => { SPRITES.weapons[idx] = c; }));
 GRENADE_TYPES.forEach((gr, idx) => loadTransparentSprite(gr.file, (c) => { SPRITES.grenades[idx] = c; }));
@@ -96,98 +89,80 @@ Object.entries(FX_FILES).forEach(([k, src]) => loadTransparentSprite(src, (c) =>
 Object.entries(PROP_FILES).forEach(([k, src]) => loadTransparentSprite(src, (c) => { SPRITES.props[k] = c; }));
 
 // ==========================================================================
-// 3. ANALYZED MAP CONFIGURATIONS (PLATFORMS, SPAWNS & PROPS PER MAP)
+// 3. 10 ANALYZED MAPS
 // ==========================================================================
 const WORLD = { width: 2400, height: 1200 };
 const BORDER_PLATFORMS = [
-  { x: 0, y: 0, w: 2400, h: 30 },
-  { x: 0, y: 1160, w: 2400, h: 40 },
-  { x: 0, y: 0, w: 30, h: 1200 },
-  { x: 2370, y: 0, w: 30, h: 1200 }
+  { x: 0, y: 0, w: 2400, h: 30 }, { x: 0, y: 1160, w: 2400, h: 40 },
+  { x: 0, y: 0, w: 30, h: 1200 }, { x: 2370, y: 0, w: 30, h: 1200 }
 ];
 
 const MAPS = [
   {
     id: 0, name: 'Desert Outpost', file: './assets/map1.png',
-    // Analyzed from 1000204456.png: Upper left bunker roof, right bunker roof, central trench wooden deck & desert floor
     platforms: [
-      { x: 180, y: 495, w: 940, h: 26 },   // Left Bunker Roof
-      { x: 1760, y: 475, w: 580, h: 26 },  // Right Command Bunker Roof
-      { x: 840, y: 785, w: 710, h: 24 },   // Center Trench Wooden Deck
-      { x: 1560, y: 745, w: 520, h: 24 },  // Right Trench Wooden Bridge
-      { x: 30, y: 980, w: 2340, h: 40 }    // Desert Canyon Floor
+      { x: 180, y: 495, w: 940, h: 26 }, { x: 1760, y: 475, w: 580, h: 26 },
+      { x: 840, y: 785, w: 710, h: 24 }, { x: 1560, y: 745, w: 520, h: 24 },
+      { x: 30, y: 980, w: 2340, h: 40 }
     ],
     props: [
       { kind: 'sandbag', x: 320, y: 455, w: 120, h: 42 },
-      { kind: 'crate',   x: 920, y: 735, w: 68, h: 52 },
-      { kind: 'tower',   x: 2080, y: 265, w: 150, h: 210 }
+      { kind: 'crate', x: 920, y: 735, w: 68, h: 52 },
+      { kind: 'tower', x: 2080, y: 265, w: 150, h: 210 }
     ],
     spawns: [{ x: 350, y: 420 }, { x: 1950, y: 400 }, { x: 1150, y: 710 }, { x: 600, y: 900 }, { x: 1800, y: 900 }, { x: 1200, y: 900 }]
   },
   {
     id: 1, name: 'Underground Bunker', file: './assets/map2.png',
-    // Analyzed from 1000204457.png: Upper-left command deck, upper-right catwalk, center grated bridge & concrete floor
     platforms: [
-      { x: 120, y: 585, w: 1180, h: 26 },  // Left Upper Command Deck
-      { x: 1520, y: 445, w: 620, h: 22 },  // Top-Right Metal Catwalk
-      { x: 1620, y: 635, w: 680, h: 26 },  // Mid-Right Bunker Deck
-      { x: 810, y: 830, w: 840, h: 24 },   // Center Grated Catwalk
-      { x: 30, y: 1030, w: 2340, h: 40 }   // Underground Floor
+      { x: 120, y: 585, w: 1180, h: 26 }, { x: 1520, y: 445, w: 620, h: 22 },
+      { x: 1620, y: 635, w: 680, h: 26 }, { x: 810, y: 830, w: 840, h: 24 },
+      { x: 30, y: 1030, w: 2340, h: 40 }
     ],
     props: [
-      { kind: 'door',    x: 720, y: 445, w: 130, h: 140 },
-      { kind: 'pipes',   x: 1950, y: 255, w: 120, h: 190 },
-      { kind: 'crate',   x: 420, y: 535, w: 68, h: 52 }
+      { kind: 'door', x: 720, y: 445, w: 130, h: 140 },
+      { kind: 'pipes', x: 1950, y: 255, w: 120, h: 190 },
+      { kind: 'crate', x: 420, y: 535, w: 68, h: 52 }
     ],
     spawns: [{ x: 350, y: 510 }, { x: 1820, y: 370 }, { x: 1180, y: 750 }, { x: 450, y: 950 }, { x: 1950, y: 950 }, { x: 1200, y: 950 }]
   },
   {
     id: 2, name: 'Abandoned Scrapyard', file: './assets/map3.png',
-    // Analyzed from 1000204455.png: Left hangar & brick roof, center scaffolding, right brick building & wooden walkway
     platforms: [
-      { x: 60, y: 530, w: 580, h: 26 },    // Left Brick Building Roof
-      { x: 860, y: 555, w: 540, h: 22 },   // Center Steel Scaffolding
-      { x: 1760, y: 525, w: 580, h: 26 },  // Right Brick Building & Walkway
-      { x: 1060, y: 815, w: 560, h: 24 },  // Lower Wooden Loading Deck
-      { x: 30, y: 1020, w: 2340, h: 40 }   // Scrapyard Dirt Yard
+      { x: 60, y: 530, w: 580, h: 26 }, { x: 860, y: 555, w: 540, h: 22 },
+      { x: 1760, y: 525, w: 580, h: 26 }, { x: 1060, y: 815, w: 560, h: 24 },
+      { x: 30, y: 1020, w: 2340, h: 40 }
     ],
     props: [
       { kind: 'container', x: 220, y: 420, w: 180, h: 110 },
-      { kind: 'catwalk',   x: 1120, y: 755, w: 180, h: 65 },
-      { kind: 'crate',     x: 1880, y: 475, w: 68, h: 52 }
+      { kind: 'catwalk', x: 1120, y: 755, w: 180, h: 65 },
+      { kind: 'crate', x: 1880, y: 475, w: 68, h: 52 }
     ],
     spawns: [{ x: 300, y: 450 }, { x: 1120, y: 480 }, { x: 2020, y: 450 }, { x: 700, y: 940 }, { x: 1650, y: 940 }, { x: 1250, y: 740 }]
   },
   {
     id: 3, name: 'Jungle River Camp', file: './assets/map4.png',
-    // Analyzed from 1000204452.png: Left stilt huts, center rope bridge, right watchtower ridge & lower river dock
     platforms: [
-      { x: 180, y: 575, w: 420, h: 24 },   // Left Stilt Hut Deck
-      { x: 640, y: 455, w: 420, h: 24 },   // Upper-Left Hut Deck
-      { x: 1060, y: 475, w: 360, h: 20 },  // Center Suspension Rope Bridge
-      { x: 1420, y: 445, w: 820, h: 26 },  // Right Watchtower & Camp Ridge
-      { x: 1360, y: 735, w: 640, h: 24 },  // Mid-Right River Hut Deck
-      { x: 30, y: 940, w: 2340, h: 40 }    // Jungle Trail & River Bank
+      { x: 180, y: 575, w: 420, h: 24 }, { x: 640, y: 455, w: 420, h: 24 },
+      { x: 1060, y: 475, w: 360, h: 20 }, { x: 1420, y: 445, w: 820, h: 26 },
+      { x: 1360, y: 735, w: 640, h: 24 }, { x: 30, y: 940, w: 2340, h: 40 }
     ],
     props: [
-      { kind: 'tower',   x: 1440, y: 235, w: 140, h: 210 },
+      { kind: 'tower', x: 1440, y: 235, w: 140, h: 210 },
       { kind: 'sandbag', x: 1580, y: 405, w: 120, h: 42 },
-      { kind: 'crate',   x: 340, y: 525, w: 68, h: 52 }
+      { kind: 'crate', x: 340, y: 525, w: 68, h: 52 }
     ],
     spawns: [{ x: 360, y: 500 }, { x: 840, y: 380 }, { x: 1850, y: 370 }, { x: 1650, y: 660 }, { x: 750, y: 860 }, { x: 1250, y: 860 }]
   },
   {
     id: 4, name: 'Catacombs Mine', file: './assets/map5.png',
-    // Analyzed from 1000204454.png: Left cavern ledge, center suspension bridge, right mine shack ledge & cavern floor
     platforms: [
-      { x: 60, y: 545, w: 860, h: 26 },    // Left Cavern Shack Ledge
-      { x: 920, y: 435, w: 640, h: 20 },   // Center Cavern Rope Bridge
-      { x: 1560, y: 425, w: 440, h: 26 },  // Upper-Right Mine Shack
-      { x: 1860, y: 615, w: 480, h: 26 },  // Mid-Right Cavern Ledge
-      { x: 30, y: 990, w: 2340, h: 40 }    // Underground Mine Track Floor
+      { x: 60, y: 545, w: 860, h: 26 }, { x: 920, y: 435, w: 640, h: 20 },
+      { x: 1560, y: 425, w: 440, h: 26 }, { x: 1860, y: 615, w: 480, h: 26 },
+      { x: 30, y: 990, w: 2340, h: 40 }
     ],
     props: [
-      { kind: 'cave',  x: 1080, y: 810, w: 220, h: 180 },
+      { kind: 'cave', x: 1080, y: 810, w: 220, h: 180 },
       { kind: 'crate', x: 260, y: 495, w: 68, h: 52 },
       { kind: 'pipes', x: 2050, y: 435, w: 110, h: 180 }
     ],
@@ -195,51 +170,41 @@ const MAPS = [
   },
   {
     id: 5, name: 'Arctic Snow Base', file: './assets/map6.png',
-    // Analyzed from 1000204453.png: Upper radar bunker roof, mid snow barracks, left cliff steel bridge & snow field
     platforms: [
-      { x: 1520, y: 345, w: 680, h: 26 },  // Upper Radar Station Roof
-      { x: 420, y: 515, w: 880, h: 26 },   // Mid-Left Snow Barracks
-      { x: 1880, y: 615, w: 460, h: 26 },  // Right Snow Bunker Roof
-      { x: 480, y: 745, w: 780, h: 24 },   // Left Cliff Steel Bridge
-      { x: 30, y: 980, w: 2340, h: 40 }    // Snow Base Ground
+      { x: 1520, y: 345, w: 680, h: 26 }, { x: 420, y: 515, w: 880, h: 26 },
+      { x: 1880, y: 615, w: 460, h: 26 }, { x: 480, y: 745, w: 780, h: 24 },
+      { x: 30, y: 980, w: 2340, h: 40 }
     ],
     props: [
-      { kind: 'bunker',  x: 1620, y: 205, w: 160, h: 140 },
+      { kind: 'bunker', x: 1620, y: 205, w: 160, h: 140 },
       { kind: 'sandbag', x: 1920, y: 575, w: 120, h: 42 },
-      { kind: 'crate',   x: 680, y: 465, w: 68, h: 52 }
+      { kind: 'crate', x: 680, y: 465, w: 68, h: 52 }
     ],
     spawns: [{ x: 1820, y: 270 }, { x: 750, y: 440 }, { x: 2080, y: 540 }, { x: 820, y: 670 }, { x: 1550, y: 900 }, { x: 1200, y: 900 }]
   },
   {
     id: 6, name: 'Reactor Core', file: './assets/map7.png',
-    // Analyzed from 1000204451.png: Left & right upper turbine decks, center grated bridge over deep reactor pit
     platforms: [
-      { x: 60, y: 545, w: 940, h: 26 },    // Left Turbine Deck
-      { x: 1120, y: 455, w: 1180, h: 26 }, // Back & Right Upper Turbine Deck
-      { x: 960, y: 775, w: 780, h: 22 },   // Center Grated Reactor Bridge
-      { x: 60, y: 895, w: 660, h: 26 },    // Lower-Left Platform
-      { x: 1680, y: 885, w: 660, h: 26 },  // Lower-Right Platform
-      { x: 30, y: 1120, w: 2340, h: 40 }   // Bottom Reactor Floor
+      { x: 60, y: 545, w: 940, h: 26 }, { x: 1120, y: 455, w: 1180, h: 26 },
+      { x: 960, y: 775, w: 780, h: 22 }, { x: 60, y: 895, w: 660, h: 26 },
+      { x: 1680, y: 885, w: 660, h: 26 }, { x: 30, y: 1120, w: 2340, h: 40 }
     ],
     props: [
-      { kind: 'pipes',   x: 240, y: 355, w: 120, h: 190 },
+      { kind: 'pipes', x: 240, y: 355, w: 120, h: 190 },
       { kind: 'catwalk', x: 1220, y: 715, w: 180, h: 65 },
-      { kind: 'door',    x: 2140, y: 495, w: 120, h: 140 }
+      { kind: 'door', x: 2140, y: 495, w: 120, h: 140 }
     ],
     spawns: [{ x: 450, y: 470 }, { x: 1650, y: 380 }, { x: 1320, y: 700 }, { x: 350, y: 820 }, { x: 1950, y: 810 }, { x: 1200, y: 1040 }]
   },
   {
     id: 7, name: 'Bio-Hazard Lab', file: './assets/map8.png',
-    // Analyzed from 1000204449.png: Upper U-shaped laboratory balcony & center metal bridge over toxic water pit
     platforms: [
-      { x: 60, y: 555, w: 840, h: 26 },    // Left Cryo-Computer Balcony
-      { x: 680, y: 445, w: 1040, h: 24 },  // Back Lab Control Walkway
-      { x: 1520, y: 555, w: 820, h: 26 },  // Right Cryo-Tank Balcony
-      { x: 420, y: 835, w: 1560, h: 24 },  // Center Grated Bridge Over Pit
-      { x: 30, y: 1120, w: 2340, h: 40 }   // Lower Lab Floor
+      { x: 60, y: 555, w: 840, h: 26 }, { x: 680, y: 445, w: 1040, h: 24 },
+      { x: 1520, y: 555, w: 820, h: 26 }, { x: 420, y: 835, w: 1560, h: 24 },
+      { x: 30, y: 1120, w: 2340, h: 40 }
     ],
     props: [
-      { kind: 'door',  x: 980, y: 315, w: 120, h: 130 },
+      { kind: 'door', x: 980, y: 315, w: 120, h: 130 },
       { kind: 'crate', x: 240, y: 505, w: 68, h: 52 },
       { kind: 'pipes', x: 2150, y: 365, w: 110, h: 190 }
     ],
@@ -247,35 +212,28 @@ const MAPS = [
   },
   {
     id: 8, name: 'Mountain Helipad', file: './assets/map9.png',
-    // Analyzed from 1000204450.png: Top command tent ridge, central helipad rock, left bunker & wooden cliff bridge
     platforms: [
-      { x: 1320, y: 365, w: 720, h: 26 },  // Top Command Tent Ridge
-      { x: 960, y: 485, w: 460, h: 24 },   // Mid-Upper Bunker Ledge
-      { x: 1280, y: 635, w: 480, h: 26 },  // Helipad Landing Pad
-      { x: 340, y: 695, w: 640, h: 26 },   // Left Outpost Bunker Deck
-      { x: 940, y: 755, w: 760, h: 22 },   // Wooden Cliff Bridge
-      { x: 30, y: 1030, w: 2340, h: 40 }   // Lower Mountain Trail
+      { x: 1320, y: 365, w: 720, h: 26 }, { x: 960, y: 485, w: 460, h: 24 },
+      { x: 1280, y: 635, w: 480, h: 26 }, { x: 340, y: 695, w: 640, h: 26 },
+      { x: 940, y: 755, w: 760, h: 22 }, { x: 30, y: 1030, w: 2340, h: 40 }
     ],
     props: [
-      { kind: 'bunker',  x: 420, y: 555, w: 160, h: 140 },
+      { kind: 'bunker', x: 420, y: 555, w: 160, h: 140 },
       { kind: 'sandbag', x: 640, y: 655, w: 120, h: 42 },
-      { kind: 'crate',   x: 1520, y: 315, w: 68, h: 52 }
+      { kind: 'crate', x: 1520, y: 315, w: 68, h: 52 }
     ],
     spawns: [{ x: 1650, y: 290 }, { x: 1500, y: 560 }, { x: 620, y: 620 }, { x: 1280, y: 680 }, { x: 750, y: 950 }, { x: 1850, y: 950 }]
   },
   {
     id: 9, name: 'Maximum Prison', file: './assets/map10.png',
-    // Analyzed from 1000204448.png: 3-tier left cellblock walkways, right cellblock balcony, guard towers & yard
     platforms: [
-      { x: 60, y: 465, w: 1040, h: 22 },   // Left Cellblock Top Tier
-      { x: 60, y: 635, w: 1040, h: 22 },   // Left Cellblock Middle Tier
-      { x: 1720, y: 495, w: 620, h: 24 },  // Right Guardhouse Roof
-      { x: 1940, y: 685, w: 420, h: 22 },  // Right Cellblock Catwalk
-      { x: 30, y: 990, w: 2340, h: 40 }    // Prison Courtyard Ground
+      { x: 60, y: 465, w: 1040, h: 22 }, { x: 60, y: 635, w: 1040, h: 22 },
+      { x: 1720, y: 495, w: 620, h: 24 }, { x: 1940, y: 685, w: 420, h: 22 },
+      { x: 30, y: 990, w: 2340, h: 40 }
     ],
     props: [
-      { kind: 'tower',   x: 960, y: 255, w: 130, h: 210 },
-      { kind: 'tower',   x: 1920, y: 285, w: 130, h: 210 },
+      { kind: 'tower', x: 960, y: 255, w: 130, h: 210 },
+      { kind: 'tower', x: 1920, y: 285, w: 130, h: 210 },
       { kind: 'sandbag', x: 1180, y: 950, w: 130, h: 42 }
     ],
     spawns: [{ x: 450, y: 390 }, { x: 450, y: 560 }, { x: 2020, y: 420 }, { x: 2120, y: 610 }, { x: 850, y: 910 }, { x: 1550, y: 910 }]
@@ -290,35 +248,40 @@ const MAP_IMAGES = MAPS.map((m) => {
 });
 
 function getActivePlatforms() {
-  const m = MAPS[state.mapId] || MAPS[0];
-  return BORDER_PLATFORMS.concat(m.platforms);
+  return BORDER_PLATFORMS.concat((MAPS[state.mapId] || MAPS[0]).platforms);
 }
 
 // ==========================================================================
-// 4. PER-WEAPON AUDIO POOL
+// 4. MOBILE AUDIO UNLOCKER, 10 WEAPON SFX & BACKGROUND MUSIC SYNTH
 // ==========================================================================
+const audioSettings = {
+  sfxOn: localStorage.getItem('do_sfx') !== 'false',
+  musicOn: localStorage.getItem('do_music') === 'true',
+  unlocked: false,
+  musicCtx: null,
+  musicTimer: null
+};
+
 const weaponAudios = WEAPONS.map((wp) => {
   const a = new Audio(wp.sound);
   a.preload = 'auto';
   return a;
 });
-let audioUnlocked = false;
+
 function unlockMobileAudio() {
-  if (audioUnlocked) return;
-  audioUnlocked = true;
+  if (audioSettings.unlocked) return;
+  audioSettings.unlocked = true;
   weaponAudios.forEach((a) => {
     a.muted = true;
-    a.play().then(() => {
-      a.pause();
-      a.currentTime = 0;
-      a.muted = false;
-    }).catch(() => {});
+    a.play().then(() => { a.pause(); a.currentTime = 0; a.muted = false; }).catch(() => {});
   });
+  if (audioSettings.musicOn) startBackgroundMusic();
 }
 window.addEventListener('touchstart', unlockMobileAudio, { once: true });
 window.addEventListener('click', unlockMobileAudio, { once: true });
 
 function playWeaponSound(shooter, weaponIdx) {
+  if (!audioSettings.sfxOn) return;
   const baseAudio = weaponAudios[weaponIdx];
   const me = state.players[state.myId];
   if (!baseAudio) return;
@@ -330,7 +293,6 @@ function playWeaponSound(shooter, weaponIdx) {
   }
   if (volume <= 0.02) return;
 
-  // Use primary audio if idle, otherwise play a fresh Audio instance from the cached URL
   if (baseAudio.paused) {
     baseAudio.volume = volume;
     baseAudio.currentTime = 0;
@@ -341,25 +303,41 @@ function playWeaponSound(shooter, weaponIdx) {
     clip.play().catch(() => {});
   }
 }
-function playWeaponSound(shooter, weaponIdx) {
-  const baseAudio = weaponAudios[weaponIdx];
-  const me = state.players[state.myId];
-  if (!baseAudio) return;
 
-  let volume = 1.0;
-  if (me && shooter && shooter.id !== me.id) {
-    const dist = Math.hypot(shooter.x - me.x, shooter.y - me.y);
-    volume = Math.max(0, Math.min(1, 1 - dist / 1150));
+function startBackgroundMusic() {
+  if (audioSettings.musicTimer) return;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!audioSettings.musicCtx) audioSettings.musicCtx = new AudioCtx();
+  if (audioSettings.musicCtx.state === 'suspended') audioSettings.musicCtx.resume();
+
+  const notes = [110, 110, 130.81, 146.83, 110, 110, 164.81, 146.83];
+  let step = 0;
+  audioSettings.musicTimer = setInterval(() => {
+    if (!audioSettings.musicOn || !audioSettings.musicCtx) return;
+    const ctxAudio = audioSettings.musicCtx;
+    const osc = ctxAudio.createOscillator();
+    const gain = ctxAudio.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = notes[step % notes.length];
+    gain.gain.setValueAtTime(0.055, ctxAudio.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.24);
+    osc.connect(gain);
+    gain.connect(ctxAudio.destination);
+    osc.start();
+    osc.stop(ctxAudio.currentTime + 0.25);
+    step++;
+  }, 280);
+}
+
+function stopBackgroundMusic() {
+  if (audioSettings.musicTimer) {
+    clearInterval(audioSettings.musicTimer);
+    audioSettings.musicTimer = null;
   }
-  if (volume <= 0.02) return;
-
-  const clip = baseAudio.cloneNode();
-  clip.volume = volume;
-  clip.play().catch(() => {});
 }
 
 // ==========================================================================
-// 5. STATE, PROXIMITY VOICE CHAT & PEERJS MULTIPLAYER
+// 5. STATE, SETTINGS DRAWER & PEERJS MULTIPLAYER
 // ==========================================================================
 const MAX_PLAYERS = 6;
 const state = {
@@ -368,15 +346,16 @@ const state = {
   roomCode: '',
   mapId: 0,
   myId: 'p_' + Math.random().toString(36).substring(2, 7),
-  myName: localStorage.getItem('do_name') || 'Soldier_' + Math.floor(100 + Math.random() * 899),
+  myName: localStorage.getItem('do_name') || 'Harsh',
   myCharId: parseInt(localStorage.getItem('do_char') || '0', 10),
   myGrenadeType: 0,
   players: {},
   bullets: [],
   grenades: [],
-  clouds: [], // { x, y, r, life, kind: 'gas'|'smoke', ownerId }
-  fxList: [], // Visual sprite explosions, sparks, fire, dust
+  clouds: [],
+  fxList: [],
   killFeed: [],
+  selectedDuration: 300,
   matchTime: 300,
   sniperZoom: false,
   camera: { x: 1180, y: 550, zoom: 1 }
@@ -384,22 +363,30 @@ const state = {
 
 const voiceChat = { enabled: false, stream: null, audioCtx: null, peerGains: {} };
 const MAX_VOICE_DISTANCE = 650;
+let peer = null, connections = {}, hostConn = null, lastFrameTime = 0;
 
-let peer = null;
-let connections = {};
-let hostConn = null;
-let lastFrameTime = 0;
-
-// Build 9 Character Cards & 10 Weapon Buttons
+// Build 9 Soldier Cards inside Settings Drawer & Sync Operator File Card
 const charGridEl = document.getElementById('characterGrid');
+function syncSoldierUI() {
+  const ch = CHARACTERS[state.myCharId] || CHARACTERS[0];
+  document.getElementById('lobbyCharPreviewImg').src = ch.file;
+  document.getElementById('lobbyCharIndex').textContent = `SOLDIER 0${ch.id + 1} / 09`;
+  document.getElementById('lobbyCharName').textContent = ch.name.toUpperCase();
+  document.getElementById('drawerCharIcon').src = ch.file;
+  document.getElementById('drawerCharName').textContent = ch.name;
+  document.getElementById('hudAvatarImg').src = ch.file;
+  document.getElementById('hudCharRole').textContent = ch.name.toUpperCase();
+  document.querySelectorAll('.char-card').forEach((el, i) => el.classList.toggle('selected', i === ch.id));
+}
+
 CHARACTERS.forEach((ch) => {
   const card = document.createElement('div');
   card.className = 'char-card' + (ch.id === state.myCharId ? ' selected' : '');
-  card.innerHTML = `<img src="${ch.file}" alt="${ch.name}" /><div class="char-name">${ch.name}</div>`;
+  card.innerHTML = `<span class="char-num">0${ch.id + 1}</span><img src="${ch.file}" alt="${ch.name}" /><div class="char-name">${ch.name}</div>`;
   card.onclick = () => {
     state.myCharId = ch.id;
     localStorage.setItem('do_char', String(ch.id));
-    document.querySelectorAll('.char-card').forEach((el, i) => el.classList.toggle('selected', i === ch.id));
+    syncSoldierUI();
     if (state.players[state.myId]) {
       state.players[state.myId].charId = ch.id;
       if (state.isHost) broadcastToClients({ type: 'lobby_sync', players: state.players, mapId: state.mapId });
@@ -407,7 +394,9 @@ CHARACTERS.forEach((ch) => {
   };
   charGridEl.appendChild(card);
 });
+syncSoldierUI();
 
+// Build Bottom-Center 10-Weapon Dock
 const weaponBarEl = document.getElementById('weaponSelectorBar');
 WEAPONS.forEach((wp) => {
   const btn = document.createElement('button');
@@ -418,11 +407,76 @@ WEAPONS.forEach((wp) => {
   weaponBarEl.appendChild(btn);
 });
 
+// Settings Drawer Controls
+const settingsDrawer = document.getElementById('settingsDrawer');
+function openSettings() {
+  document.getElementById('drawerMatchActions').classList.toggle('hidden', state.mode !== 'playing');
+  settingsDrawer.classList.remove('hidden');
+}
+document.getElementById('lobbySettingsBtn').onclick = openSettings;
+document.getElementById('openSoldierFromCard').onclick = openSettings;
+document.getElementById('inGameSettingsBtn').onclick = openSettings;
+document.getElementById('closeSettingsBtn').onclick = () => settingsDrawer.classList.add('hidden');
+
+document.getElementById('toggleSoldierPickerBtn').onclick = () => {
+  charGridEl.classList.toggle('hidden');
+  document.getElementById('soldierExpandArrow').textContent = charGridEl.classList.contains('hidden') ? '▶' : '▼';
+};
+
+const sfxBtn = document.getElementById('toggleSfxBtn');
+const musicBtn = document.getElementById('toggleMusicBtn');
+function refreshAudioButtons() {
+  sfxBtn.textContent = audioSettings.sfxOn ? 'ON' : 'OFF';
+  sfxBtn.className = 'switch-pill ' + (audioSettings.sfxOn ? 'on' : 'off');
+  musicBtn.textContent = audioSettings.musicOn ? 'ON' : 'OFF';
+  musicBtn.className = 'switch-pill ' + (audioSettings.musicOn ? 'on' : 'off');
+}
+refreshAudioButtons();
+
+sfxBtn.onclick = () => {
+  audioSettings.sfxOn = !audioSettings.sfxOn;
+  localStorage.setItem('do_sfx', String(audioSettings.sfxOn));
+  refreshAudioButtons();
+};
+
+musicBtn.onclick = () => {
+  audioSettings.musicOn = !audioSettings.musicOn;
+  localStorage.setItem('do_music', String(audioSettings.musicOn));
+  if (audioSettings.musicOn) startBackgroundMusic();
+  else stopBackgroundMusic();
+  refreshAudioButtons();
+};
+
+document.getElementById('drawerExitMatchBtn').onclick = () => location.reload();
+
+// Map & Timer Presets
 const mapSelectEl = document.getElementById('mapSelect');
 mapSelectEl.onchange = (e) => {
   state.mapId = parseInt(e.target.value, 10) || 0;
   if (state.isHost) broadcastToClients({ type: 'lobby_sync', players: state.players, mapId: state.mapId });
 };
+
+function formatClock(sec) {
+  const s = Math.max(0, Math.floor(sec));
+  return `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+}
+
+document.querySelectorAll('.preset-btn').forEach((btn) => {
+  btn.onclick = () => {
+    document.querySelectorAll('.preset-btn').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.selectedDuration = parseInt(btn.dataset.sec, 10);
+    state.matchTime = state.selectedDuration;
+    document.getElementById('lobbyTimerDisplay').textContent = formatClock(state.matchTime);
+  };
+});
+
+function adjustLiveTimer(deltaSeconds) {
+  if (state.isHost) state.matchTime = Math.max(10, Math.min(3600, state.matchTime + deltaSeconds));
+  else if (hostConn && hostConn.open) hostConn.send({ type: 'adjust_time', delta: deltaSeconds });
+}
+document.getElementById('timePlusBtn').onclick = () => adjustLiveTimer(30);
+document.getElementById('timeMinusBtn').onclick = () => adjustLiveTimer(-30);
 
 const nameInput = document.getElementById('playerNameInput');
 nameInput.value = state.myName;
@@ -446,34 +500,16 @@ function renderSavedFriends() {
 }
 renderSavedFriends();
 
-function formatClock(sec) {
-  const s = Math.max(0, Math.floor(sec));
-  const m = Math.floor(s / 60).toString().padStart(2, '0');
-  const r = (s % 60).toString().padStart(2, '0');
-  return `${m}:${r}`;
-}
-function updateLobbyTimerLabel() { document.getElementById('lobbyTimerDisplay').textContent = formatClock(state.matchTime); }
-updateLobbyTimerLabel();
-
-document.getElementById('lobbyTimePlus').onclick = () => { state.matchTime = Math.min(3600, state.matchTime + 60); updateLobbyTimerLabel(); };
-document.getElementById('lobbyTimeMinus').onclick = () => { state.matchTime = Math.max(30, state.matchTime - 60); updateLobbyTimerLabel(); };
-
-function adjustLiveTimer(deltaSeconds) {
-  if (state.isHost) state.matchTime = Math.max(10, Math.min(3600, state.matchTime + deltaSeconds));
-  else if (hostConn && hostConn.open) hostConn.send({ type: 'adjust_time', delta: deltaSeconds });
-}
-document.getElementById('timePlusBtn').onclick = () => adjustLiveTimer(30);
-document.getElementById('timeMinusBtn').onclick = () => adjustLiveTimer(-30);
-
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('room')) document.getElementById('roomCodeInput').value = urlParams.get('room').toUpperCase();
 
 document.getElementById('installAppBtn').onclick = () => document.getElementById('installModal').classList.remove('hidden');
 document.getElementById('closeInstallModal').onclick = () => document.getElementById('installModal').classList.add('hidden');
 
-// Proximity Voice Controls
+// Proximity Voice Chat
 async function toggleProximityMic() {
-  const btn = document.getElementById('toggleMicBtn');
+  const hudBtn = document.getElementById('toggleMicBtn');
+  const drawerBtn = document.getElementById('drawerMicBtn');
   if (!voiceChat.enabled) {
     try {
       if (!voiceChat.stream) {
@@ -485,14 +521,18 @@ async function toggleProximityMic() {
       }
       voiceChat.stream.getAudioTracks().forEach((t) => { t.enabled = true; });
       voiceChat.enabled = true;
-      btn.textContent = '🎙️ MIC: ON';
+      hudBtn.textContent = 'MIC ON';
+      drawerBtn.textContent = 'ON';
+      drawerBtn.className = 'switch-pill on';
     } catch (err) {
-      alert('Microphone permission is required for voice chat.');
+      alert('Microphone permission is needed for voice chat.');
     }
   } else {
     if (voiceChat.stream) voiceChat.stream.getAudioTracks().forEach((t) => { t.enabled = false; });
     voiceChat.enabled = false;
-    btn.textContent = '🎙️ MIC: OFF';
+    hudBtn.textContent = 'MIC OFF';
+    drawerBtn.textContent = 'OFF';
+    drawerBtn.className = 'switch-pill off';
   }
 }
 
@@ -513,10 +553,7 @@ function attachVoiceCall(call) {
 
 function bindIncomingVoiceCalls() {
   if (!peer) return;
-  peer.on('call', (call) => {
-    call.answer(voiceChat.stream || undefined);
-    attachVoiceCall(call);
-  });
+  peer.on('call', (call) => { call.answer(voiceChat.stream || undefined); attachVoiceCall(call); });
 }
 
 function updateProximityVoiceVolumes() {
@@ -530,21 +567,21 @@ function updateProximityVoiceVolumes() {
   });
 }
 document.getElementById('toggleMicBtn').onclick = toggleProximityMic;
+document.getElementById('drawerMicBtn').onclick = toggleProximityMic;
 
+// ==========================================================================
+// 6. ROOM CREATION, JOINING & EXACT PLAYER COUNT
+// ==========================================================================
 function createPlayer(id, name, charId, isBot = false, spawnIdx = 0) {
   const activeMap = MAPS[state.mapId] || MAPS[0];
   const sp = activeMap.spawns[spawnIdx % activeMap.spawns.length];
   return {
     id, name, charId, isBot,
-    x: sp.x, y: sp.y,
-    vx: 0, vy: 0,
+    x: sp.x, y: sp.y, vx: 0, vy: 0,
     facing: 1, aimAngle: 0,
-    hp: 100, maxHp: 100,
-    weaponIdx: 1,
-    kills: 0, deaths: 0,
-    jetpacking: false,
-    lastShot: 0, lastGrenade: 0,
-    deadTimer: 0, aiTimer: 0, aiDir: 1
+    hp: 100, maxHp: 100, armor: 0, boostTimer: 0,
+    weaponIdx: 1, kills: 0, deaths: 0,
+    lastShot: 0, lastGrenade: 0, deadTimer: 0, aiTimer: 0, aiDir: 1
   };
 }
 
@@ -607,6 +644,7 @@ document.getElementById('joinRoomBtn').onclick = () => {
 document.getElementById('soloBotsBtn').onclick = () => {
   state.isHost = true;
   state.roomCode = 'BOTS';
+  state.matchTime = state.selectedDuration;
   state.players = {};
   state.players[state.myId] = createPlayer(state.myId, state.myName, state.myCharId, false, 0);
   addBotsUpTo(MAX_PLAYERS);
@@ -632,31 +670,28 @@ function updateLobbyPlayersUI() {
   playersArr.forEach((p) => {
     const chip = document.createElement('div');
     chip.className = 'player-chip';
-    const chName = CHARACTERS[p.charId]?.name || 'Soldier';
-    chip.textContent = `🪖 ${p.name} (${chName}) ${p.id === state.myId ? '(You)' : ''}`;
+    chip.textContent = `🪖 ${p.name} (${CHARACTERS[p.charId]?.name || 'Soldier'})`;
     listEl.appendChild(chip);
   });
 }
 
 document.getElementById('copyLinkBtn').onclick = () => {
-  const url = `${location.origin}${location.pathname}?room=${state.roomCode}`;
-  navigator.clipboard.writeText(url);
+  navigator.clipboard.writeText(`${location.origin}${location.pathname}?room=${state.roomCode}`);
   document.getElementById('copyLinkBtn').textContent = '✅ Copied';
   setTimeout(() => (document.getElementById('copyLinkBtn').textContent = '📋 Copy Link'), 1800);
 };
 
 document.getElementById('whatsappShareBtn').onclick = () => {
   const url = `${location.origin}${location.pathname}?room=${state.roomCode}`;
-  const text = `Join my Doodle Outpost match! Code: *${state.roomCode}* — ${url}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent(`Join my Doodle Outpost match! Code: *${state.roomCode}* — ${url}`)}`, '_blank');
 };
 
 document.getElementById('startMatchBtn').onclick = () => {
   if (document.getElementById('fillBotsCheck').checked) addBotsUpTo(MAX_PLAYERS);
-  // Re-align spawn points to the chosen map
+  state.matchTime = state.selectedDuration;
   Object.values(state.players).forEach((p, idx) => {
     const sp = (MAPS[state.mapId] || MAPS[0]).spawns[idx % 6];
-    p.x = sp.x; p.y = sp.y;
+    p.x = sp.x; p.y = sp.y; p.hp = 100; p.armor = 0; p.kills = 0; p.deaths = 0;
   });
   broadcastToClients({ type: 'start', players: state.players, roomCode: state.roomCode, matchTime: state.matchTime, mapId: state.mapId });
   startMatch();
@@ -701,6 +736,7 @@ function handleClientReceive(msg) {
     state.roomCode = msg.roomCode;
     state.matchTime = msg.matchTime;
     state.mapId = msg.mapId || 0;
+    document.getElementById('matchOverModal').classList.add('hidden');
     startMatch();
   } else if (msg.type === 'state') {
     state.players = msg.players;
@@ -719,7 +755,7 @@ function broadcastToClients(payload) {
 }
 
 // ==========================================================================
-// 6. INPUTS (PC KEYBOARD/MOUSE + MOBILE DUAL JOYSTICKS & GRENADE SELECTOR)
+// 7. INPUTS (PC KEYBOARD/MOUSE + MOBILE DUAL JOYSTICKS)
 // ==========================================================================
 const input = { moveX: 0, moveY: 0, aimX: 1, aimY: 0, shooting: false };
 const keys = {};
@@ -801,7 +837,7 @@ function bindVirtualStick(zoneId, knobId, onMove, onRelease) {
     const rect = zone.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-    const maxR = 40;
+    const maxR = 36;
     let dx = t.clientX - cx;
     let dy = t.clientY - cy;
     const dist = Math.hypot(dx, dy);
@@ -824,6 +860,19 @@ document.getElementById('btnZoom').onclick = () => { state.sniperZoom = !state.s
 document.getElementById('toggleScoreboardBtn').onclick = toggleScoreboard;
 document.getElementById('closeSbBtn').onclick = toggleScoreboard;
 document.getElementById('leaveMatchBtn').onclick = () => location.reload();
+document.getElementById('matchOverLobbyBtn').onclick = () => location.reload();
+document.getElementById('rematchBtn').onclick = () => {
+  document.getElementById('matchOverModal').classList.add('hidden');
+  if (state.isHost) {
+    state.matchTime = state.selectedDuration;
+    Object.values(state.players).forEach((p, idx) => {
+      const sp = (MAPS[state.mapId] || MAPS[0]).spawns[idx % 6];
+      p.x = sp.x; p.y = sp.y; p.hp = 100; p.armor = 0; p.kills = 0; p.deaths = 0;
+    });
+    state.mode = 'playing';
+    broadcastToClients({ type: 'start', players: state.players, roomCode: state.roomCode, matchTime: state.matchTime, mapId: state.mapId });
+  }
+};
 
 function selectWeapon(idx) {
   const me = state.players[state.myId];
@@ -831,6 +880,12 @@ function selectWeapon(idx) {
   me.weaponIdx = idx;
   document.querySelectorAll('.w-slot').forEach((b) => b.classList.toggle('active', parseInt(b.dataset.w) === idx));
   document.getElementById('hudWeaponName').textContent = WEAPONS[idx].name;
+
+  // Instant self-use if player taps Medkit, Ammo Crate, or Gear Crate slot directly
+  const w = WEAPONS[idx];
+  if (state.isHost && (w.type === 'heal' || w.type === 'ammo_boost' || w.type === 'armor_boost')) {
+    fireWeapon(me, performance.now());
+  }
   if (!state.isHost && hostConn && hostConn.open) {
     hostConn.send({ type: 'input', id: state.myId, input, weaponIdx: idx });
   }
@@ -870,9 +925,8 @@ function renderScoreboard() {
     const div = document.createElement('div');
     div.className = 'sb-row';
     const canAdd = p.id !== state.myId && !p.isBot;
-    const cName = CHARACTERS[p.charId]?.name || 'Soldier';
     div.innerHTML = `
-      <span>🪖 ${p.name} <small>(${cName})</small></span>
+      <span>🪖 ${p.name} <small>(${CHARACTERS[p.charId]?.name || 'Soldier'})</small></span>
       <span>Kills: <b>${p.kills}</b> | Deaths: ${p.deaths}</span>
       ${canAdd ? `<button class="btn-sm" onclick="saveFriend('${p.id}','${p.name}');this.textContent='⭐ Saved'">+ Friend</button>` : ''}
     `;
@@ -881,7 +935,7 @@ function renderScoreboard() {
 }
 
 // ==========================================================================
-// 7. SIMULATION, 3 GRENADE TYPES & SPRITE EFFECTS ENGINE
+// 8. SIMULATION, UTILITY CRATES (MEDKIT/AMMO/ARMOR) & MATCH OVER
 // ==========================================================================
 function addFxSprite(fxKey, x, y, size, life) {
   state.fxList.push({ fxKey, x, y, size, life, maxLife: life });
@@ -890,10 +944,9 @@ function addFxSprite(fxKey, x, y, size, life) {
 function startMatch() {
   state.mode = 'playing';
   document.getElementById('lobbyScreen').classList.add('hidden');
+  settingsDrawer.classList.add('hidden');
   document.getElementById('gameContainer').classList.remove('hidden');
-  const myChar = CHARACTERS[state.myCharId] || CHARACTERS[0];
-  document.getElementById('hudAvatarImg').src = myChar.file;
-  document.getElementById('hudCharRole').textContent = myChar.name.toUpperCase();
+  syncSoldierUI();
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
   lastFrameTime = performance.now();
@@ -915,20 +968,40 @@ function updateKeyboardInput() {
   else if (!('ontouchstart' in window)) { input.moveX = 0; input.moveY = 0; }
 }
 
+function showMatchOverScreen() {
+  state.mode = 'gameover';
+  const rows = document.getElementById('finalLeaderboardRows');
+  rows.innerHTML = '';
+  Object.values(state.players).sort((a, b) => b.kills - a.kills).forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'sb-row';
+    row.innerHTML = `<span>#${i + 1} ${p.name}</span><span>Kills: <b>${p.kills}</b> • Deaths: ${p.deaths}</span>`;
+    rows.appendChild(row);
+  });
+  document.getElementById('rematchBtn').classList.toggle('hidden', !state.isHost);
+  document.getElementById('matchOverModal').classList.remove('hidden');
+}
+
 function gameLoop(now) {
   const dt = Math.min((now - lastFrameTime) / 1000, 0.05);
   lastFrameTime = now;
   updateKeyboardInput();
 
-  if (state.isHost) {
-    stepHostSimulation(dt, now);
-    broadcastToClients({
-      type: 'state', players: state.players, bullets: state.bullets,
-      grenades: state.grenades, clouds: state.clouds, fxList: state.fxList,
-      killFeed: state.killFeed, matchTime: state.matchTime, mapId: state.mapId
-    });
-  } else if (hostConn && hostConn.open) {
-    hostConn.send({ type: 'input', id: state.myId, input });
+  if (state.mode === 'playing') {
+    if (state.isHost) {
+      stepHostSimulation(dt, now);
+      broadcastToClients({
+        type: 'state', players: state.players, bullets: state.bullets,
+        grenades: state.grenades, clouds: state.clouds, fxList: state.fxList,
+        killFeed: state.killFeed, matchTime: state.matchTime, mapId: state.mapId
+      });
+    } else if (hostConn && hostConn.open) {
+      hostConn.send({ type: 'input', id: state.myId, input });
+    }
+
+    if (state.matchTime <= 0) {
+      showMatchOverScreen();
+    }
   }
 
   updateProximityVoiceVolumes();
@@ -944,11 +1017,13 @@ function stepHostSimulation(dt, now) {
   const activeMap = MAPS[state.mapId] || MAPS[0];
 
   Object.values(state.players).forEach((p, idx) => {
+    if (p.boostTimer > 0) p.boostTimer = Math.max(0, p.boostTimer - dt);
+
     if (p.hp <= 0) {
       p.deadTimer -= dt;
       if (p.deadTimer <= 0) {
         const sp = activeMap.spawns[(idx + Math.floor(Math.random() * 6)) % activeMap.spawns.length];
-        p.x = sp.x; p.y = sp.y; p.vx = 0; p.vy = 0; p.hp = 100;
+        p.x = sp.x; p.y = sp.y; p.vx = 0; p.vy = 0; p.hp = 100; p.armor = 0;
       }
       return;
     }
@@ -961,12 +1036,8 @@ function stepHostSimulation(dt, now) {
     if (ctrl.moveY < -0.22) {
       p.vy += ctrl.moveY * 1450 * dt;
       p.vy = Math.max(p.vy, -460);
-      p.jetpacking = true;
-      if (Math.random() < 0.35) {
-        addFxSprite('fire', p.x - p.facing * 14, p.y + 24, 34, 0.18);
-      }
+      if (Math.random() < 0.35) addFxSprite('fire', p.x - p.facing * 14, p.y + 24, 34, 0.18);
     } else {
-      p.jetpacking = false;
       p.vy = Math.min(p.vy + 980 * dt, 680);
     }
 
@@ -1000,19 +1071,16 @@ function stepHostSimulation(dt, now) {
     }
 
     if (hitWall || hitPlayer || b.life <= 0) {
-      if (b.type === 'rocket') {
-        explodeBlast(b.x, b.y, b.ownerId, 135, 95, 'ROCKET RPG');
-      } else if (hitPlayer && hitPlayer !== 'BLOCKED') {
+      if (b.type === 'rocket') explodeBlast(b.x, b.y, b.ownerId, 135, 95, 'ROCKET RPG');
+      else if (hitPlayer && hitPlayer !== 'BLOCKED') {
         addFxSprite('sparks', b.x, b.y, 38, 0.2);
         damagePlayer(hitPlayer, b.damage, b.ownerId, b.weaponName);
-      } else if (hitWall) {
-        addFxSprite('dust', b.x, b.y, 34, 0.22);
-      }
+      } else if (hitWall) addFxSprite('dust', b.x, b.y, 34, 0.22);
       state.bullets.splice(i, 1);
     }
   }
 
-  // 3 Grenade Types: 0 = Frag Explosion, 1 = Green Toxic Gas, 2 = Tactical White Smoke Screen
+  // Grenades
   for (let i = state.grenades.length - 1; i >= 0; i--) {
     const g = state.grenades[i];
     g.vy += 850 * dt; g.x += g.vx * dt; g.y += g.vy * dt; g.fuse -= dt;
@@ -1022,13 +1090,9 @@ function stepHostSimulation(dt, now) {
       }
     }
     if (g.fuse <= 0) {
-      if (g.gType === 0) {
-        explodeBlast(g.x, g.y, g.ownerId, 150, 100, 'FRAG GRENADE');
-      } else if (g.gType === 1) {
-        state.clouds.push({ x: g.x, y: g.y, r: 135, life: 7.0, kind: 'gas', ownerId: g.ownerId });
-      } else {
-        state.clouds.push({ x: g.x, y: g.y, r: 165, life: 9.0, kind: 'smoke', ownerId: g.ownerId });
-      }
+      if (g.gType === 0) explodeBlast(g.x, g.y, g.ownerId, 150, 100, 'FRAG GRENADE');
+      else if (g.gType === 1) state.clouds.push({ x: g.x, y: g.y, r: 135, life: 7.0, kind: 'gas', ownerId: g.ownerId });
+      else state.clouds.push({ x: g.x, y: g.y, r: 165, life: 9.0, kind: 'smoke', ownerId: g.ownerId });
       state.grenades.splice(i, 1);
     }
   }
@@ -1039,15 +1103,12 @@ function stepHostSimulation(dt, now) {
     cl.life -= dt;
     if (cl.kind === 'gas') {
       Object.values(state.players).forEach((p) => {
-        if (p.hp > 0 && Math.hypot(p.x - cl.x, p.y - cl.y) < cl.r) {
-          damagePlayer(p, 28 * dt, cl.ownerId, 'GREEN GAS');
-        }
+        if (p.hp > 0 && Math.hypot(p.x - cl.x, p.y - cl.y) < cl.r) damagePlayer(p, 28 * dt, cl.ownerId, 'GREEN GAS');
       });
     }
     if (cl.life <= 0) state.clouds.splice(i, 1);
   }
 
-  // Update Visual Effect Timers
   for (let i = state.fxList.length - 1; i >= 0; i--) {
     state.fxList[i].life -= dt;
     if (state.fxList[i].life <= 0) state.fxList.splice(i, 1);
@@ -1073,24 +1134,39 @@ function moveAndCollide(p, dt, platforms) {
 
 function fireWeapon(p, now) {
   const w = WEAPONS[p.weaponIdx];
-  if (now - p.lastShot < w.rate) return;
+  const effectiveRate = p.boostTimer > 0 ? w.rate * 0.55 : w.rate;
+  if (now - p.lastShot < effectiveRate) return;
   p.lastShot = now;
   playWeaponSound(p, p.weaponIdx);
 
+  // Slot 10: Medkit Box (+40 HP Heal)
   if (w.type === 'heal') {
-    p.hp = Math.min(p.maxHp, p.hp + 35);
-    addFxSprite('sparks', p.x, p.y, 64, 0.35);
+    p.hp = Math.min(p.maxHp, p.hp + 40);
+    addFxSprite('sparks', p.x, p.y, 68, 0.35);
     return;
   }
 
+  // Slot 8: Ammo Crate (6-Second 2x Fire Rate & +25% Damage Boost)
+  if (w.type === 'ammo_boost') {
+    p.boostTimer = 6.0;
+    addFxSprite('sparks', p.x, p.y, 74, 0.4);
+    return;
+  }
+
+  // Slot 9: Gear Crate (+50 Armor Shield)
+  if (w.type === 'armor_boost') {
+    p.armor = Math.min(100, (p.armor || 0) + 50);
+    addFxSprite('sparks', p.x, p.y, 74, 0.4);
+    return;
+  }
+
+  // Slot 1 & 5: Riot Shield Bash & Chainsaw
   if (w.type === 'shield' || w.type === 'melee') {
     const rx = p.x + Math.cos(p.aimAngle) * 40;
     const ry = p.y + Math.sin(p.aimAngle) * 40;
     if (w.type === 'melee') addFxSprite('sparks', rx, ry, 42, 0.16);
     Object.values(state.players).forEach((t) => {
-      if (t.id !== p.id && t.hp > 0 && Math.hypot(t.x - rx, t.y - ry) < 42) {
-        damagePlayer(t, w.damage, p.id, w.name);
-      }
+      if (t.id !== p.id && t.hp > 0 && Math.hypot(t.x - rx, t.y - ry) < 42) damagePlayer(t, w.damage, p.id, w.name);
     });
     return;
   }
@@ -1099,19 +1175,15 @@ function fireWeapon(p, now) {
   const my = p.y + Math.sin(p.aimAngle) * 30;
   addFxSprite('muzzle', mx, my, 36, 0.12);
 
+  const dmgMult = p.boostTimer > 0 ? 1.25 : 1.0;
   for (let i = 0; i < w.count; i++) {
     const offset = w.count === 2 ? (i === 0 ? -5 : 5) : 0;
     const ang = p.aimAngle + (Math.random() - 0.5) * w.spread;
     state.bullets.push({
       x: mx, y: my + offset,
-      vx: Math.cos(ang) * w.speed,
-      vy: Math.sin(ang) * w.speed,
-      damage: w.damage,
-      ownerId: p.id,
-      weaponName: w.name,
-      color: w.color,
-      type: w.type,
-      life: 1.8
+      vx: Math.cos(ang) * w.speed, vy: Math.sin(ang) * w.speed,
+      damage: Math.round(w.damage * dmgMult), ownerId: p.id,
+      weaponName: w.name, color: w.color, type: w.type, life: 1.8
     });
   }
 }
@@ -1140,7 +1212,13 @@ function explodeBlast(x, y, ownerId, radius, maxDmg, label) {
 
 function damagePlayer(target, amount, attackerId, weaponName) {
   if (target.hp <= 0) return;
-  target.hp -= amount;
+  let rem = amount;
+  if (target.armor > 0) {
+    const absorbed = Math.min(target.armor, rem);
+    target.armor -= absorbed;
+    rem -= absorbed;
+  }
+  target.hp -= rem;
   if (target.hp <= 0) {
     target.hp = 0; target.deaths += 1; target.deadTimer = 3.0;
     addFxSprite('explosion', target.x, target.y, 110, 0.4);
@@ -1158,7 +1236,7 @@ function computeBotAI(bot, dt) {
   if (bot.aiTimer <= 0) {
     bot.aiTimer = 0.8 + Math.random() * 1.1;
     bot.aiDir = Math.random() < 0.5 ? -1 : 1;
-    if (Math.random() < 0.25) bot.weaponIdx = 1 + Math.floor(Math.random() * 7);
+    if (Math.random() < 0.25) bot.weaponIdx = 1 + Math.floor(Math.random() * 6);
   }
   let nearest = null, bestDist = 9999;
   Object.values(state.players).forEach((o) => {
@@ -1177,7 +1255,7 @@ function computeBotAI(bot, dt) {
 }
 
 // ==========================================================================
-// 8. CAMERA & MULTI-MAP / PROPS / GRENADE / FX RENDERING
+// 9. CAMERA & CANVAS RENDERING
 // ==========================================================================
 function updateCamera() {
   const me = state.players[state.myId];
@@ -1189,7 +1267,7 @@ function updateCamera() {
 }
 
 function renderGame() {
-  ctx.fillStyle = '#141815';
+  ctx.fillStyle = '#0d120e';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.save();
@@ -1197,42 +1275,33 @@ function renderGame() {
   ctx.scale(state.camera.zoom, state.camera.zoom);
   ctx.translate(-state.camera.x, -state.camera.y);
 
-  // 1. Draw Selected Map Image
   const activeMap = MAPS[state.mapId] || MAPS[0];
   const mapImg = MAP_IMAGES[state.mapId];
   if (mapImg && mapImg.complete && mapImg.naturalWidth > 0) {
     ctx.drawImage(mapImg, 0, 0, WORLD.width, WORLD.height);
   } else {
-    ctx.fillStyle = '#242b25';
+    ctx.fillStyle = '#1b221c';
     ctx.fillRect(0, 0, WORLD.width, WORLD.height);
-    ctx.fillStyle = '#57534e';
+    ctx.fillStyle = '#4b5563';
     activeMap.platforms.forEach((pl) => ctx.fillRect(pl.x, pl.y, pl.w, pl.h));
   }
 
-  // 2. Draw Map-Specific Props (Bunkers, Watchtowers, Crates, Sandbags, Pipes, Containers)
   (activeMap.props || []).forEach((pr) => {
     const pSprite = SPRITES.props[pr.kind];
     if (pSprite) ctx.drawImage(pSprite, pr.x, pr.y, pr.w, pr.h);
   });
 
-  // 3. Draw Soldiers & Equipped Weapons
-  Object.values(state.players).forEach((p) => {
-    if (p.hp <= 0) return;
-    drawCharacterAndWeapon(p);
-  });
+  Object.values(state.players).forEach((p) => { if (p.hp > 0) drawCharacterAndWeapon(p); });
 
-  // 4. Draw Thrown Grenades (Frag / Green Gas / Smoke Canister)
   for (const g of state.grenades) {
     const gSprite = SPRITES.grenades[g.gType];
-    if (gSprite) {
-      ctx.drawImage(gSprite, g.x - 12, g.y - 14, 24, 28);
-    } else {
+    if (gSprite) ctx.drawImage(gSprite, g.x - 12, g.y - 14, 24, 28);
+    else {
       ctx.fillStyle = g.gType === 1 ? '#22c55e' : g.gType === 2 ? '#cbd5e1' : '#4b5563';
       ctx.beginPath(); ctx.arc(g.x, g.y, 7, 0, Math.PI * 2); ctx.fill();
     }
   }
 
-  // 5. Draw Bullets & Rockets
   for (const b of state.bullets) {
     ctx.fillStyle = b.color;
     ctx.beginPath();
@@ -1240,21 +1309,18 @@ function renderGame() {
     ctx.fill();
   }
 
-  // 6. Draw Green Toxic Gas Clouds & White Tactical Smoke Screens
   for (const cl of state.clouds) {
     const cSprite = cl.kind === 'gas' ? SPRITES.fx.smokeGreen : SPRITES.fx.smokeWhite;
     ctx.save();
     ctx.globalAlpha = Math.min(0.92, cl.life * 0.45);
-    if (cSprite) {
-      ctx.drawImage(cSprite, cl.x - cl.r, cl.y - cl.r * 0.85, cl.r * 2, cl.r * 1.6);
-    } else {
+    if (cSprite) ctx.drawImage(cSprite, cl.x - cl.r, cl.y - cl.r * 0.85, cl.r * 2, cl.r * 1.6);
+    else {
       ctx.fillStyle = cl.kind === 'gas' ? 'rgba(34,197,94,0.6)' : 'rgba(226,232,240,0.75)';
       ctx.beginPath(); ctx.arc(cl.x, cl.y, cl.r, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
   }
 
-  // 7. Draw Explosion, Fire, Sparks & Dust FX Sprites
   for (const fx of state.fxList) {
     const fSprite = SPRITES.fx[fx.fxKey];
     if (fSprite) {
@@ -1287,12 +1353,8 @@ function drawCharacterAndWeapon(p) {
   const charImg = SPRITES.chars[p.charId];
   ctx.save();
   ctx.scale(p.facing, 1);
-  if (charImg) {
-    ctx.drawImage(charImg, -34, -34, 68, 68);
-  } else {
-    ctx.fillStyle = '#4b633c';
-    ctx.fillRect(-16, -26, 32, 54);
-  }
+  if (charImg) ctx.drawImage(charImg, -34, -34, 68, 68);
+  else { ctx.fillStyle = '#4b633c'; ctx.fillRect(-16, -26, 32, 54); }
   ctx.restore();
   ctx.restore();
 
@@ -1303,9 +1365,7 @@ function drawCharacterAndWeapon(p) {
     ctx.rotate(p.aimAngle);
     if (p.facing < 0) ctx.scale(1, -1);
     const isShield = p.weaponIdx === 0;
-    const drawW = isShield ? 28 : 42;
-    const drawH = isShield ? 42 : 26;
-    ctx.drawImage(wImg, isShield ? 12 : 4, -drawH / 2, drawW, drawH);
+    ctx.drawImage(wImg, isShield ? 12 : 4, isShield ? -21 : -13, isShield ? 28 : 42, isShield ? 42 : 26);
     ctx.restore();
   }
 }
@@ -1316,6 +1376,9 @@ function updateHudUI() {
   const activeMap = MAPS[state.mapId] || MAPS[0];
   document.getElementById('healthBar').style.width = `${Math.max(0, me.hp)}%`;
   document.getElementById('hpText').textContent = `HP ${Math.ceil(me.hp)}`;
+  document.getElementById('armorBar').style.width = `${Math.min(100, me.armor || 0)}%`;
+  document.getElementById('armorText').textContent = `SHIELD ${Math.ceil(me.armor || 0)}`;
+  document.getElementById('boostBadge').classList.toggle('hidden', !(me.boostTimer > 0));
   document.getElementById('matchScore').textContent = `${activeMap.name.toUpperCase()} • KILLS: ${me.kills} • ${Object.keys(state.players).length}/${MAX_PLAYERS}`;
   document.getElementById('matchTimer').textContent = formatClock(state.matchTime);
   document.getElementById('killFeed').innerHTML = state.killFeed.map((item) => `<div class="kill-item">${item}</div>`).join('');
