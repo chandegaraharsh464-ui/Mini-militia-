@@ -1,5 +1,5 @@
 /* ==========================================================================
-   DOODLE OUTPOST — 9 CHARACTERS, 10 WEAPONS/GEAR, 10 SOUND EFFECTS & PROXIMITY MIC
+   DOODLE OUTPOST — 10 ANALYZED MAPS, 9 CHARACTERS, 10 WEAPONS, 3 GRENADES & FX
    ========================================================================== */
 
 if ('serviceWorker' in navigator) {
@@ -7,7 +7,32 @@ if ('serviceWorker' in navigator) {
 }
 
 // ==========================================================================
-// 1. 9 NAMED CHARACTERS & 10 WEAPONS/GEAR DEFINITIONS
+// 1. TRANSPARENT SPRITE LOADER (STRIPS PURE WHITE BACKGROUNDS)
+// ==========================================================================
+function loadTransparentSprite(src, onReady) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = img.width;
+    c.height = img.height;
+    const g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    const data = g.getImageData(0, 0, c.width, c.height);
+    const d = data.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i] > 238 && d[i + 1] > 238 && d[i + 2] > 238) {
+        d[i + 3] = 0;
+      }
+    }
+    g.putImageData(data, 0, 0);
+    onReady(c);
+  };
+  img.src = src;
+}
+
+// ==========================================================================
+// 2. 9 CHARACTERS, 10 WEAPONS, 3 GRENADES & VISUAL EFFECT SPRITES
 // ==========================================================================
 const CHARACTERS = [
   { id: 0, name: 'Desert Medic',  file: './assets/char1.png' },
@@ -34,39 +59,244 @@ const WEAPONS = [
   { id: 9, name: 'MEDKIT BOX',   file: './assets/weap10.png', sound: './sounds/w10_medkit.mp3',    rate: 600, speed: 0,  damage: 0,  spread: 0,    count: 1, color: '#22c55e', type: 'heal'   }
 ];
 
-const SPRITES = { chars: [], weapons: [] };
+const GRENADE_TYPES = [
+  { id: 0, label: 'FRAG',  name: 'FRAG GRENADE',  file: './assets/grenade_frag.png' },
+  { id: 1, label: 'GAS',   name: 'GREEN GAS',     file: './assets/grenade_gas.png' },
+  { id: 2, label: 'SMOKE', name: 'SMOKE SCREEN',  file: './assets/grenade_smoke.png' }
+];
 
-function loadTransparentSprite(src, onReady) {
+const FX_FILES = {
+  smokeWhite: './assets/fx_smoke_white.png',
+  smokeGreen: './assets/fx_smoke_green.png',
+  explosion:  './assets/fx_explosion.png',
+  sparks:     './assets/fx_sparks.png',
+  fire:       './assets/fx_fire.png',
+  dust:       './assets/fx_dust.png',
+  muzzle:     './assets/fx_muzzle.png'
+};
+
+const PROP_FILES = {
+  bunker:    './assets/prop_bunker.png',
+  tower:     './assets/prop_tower.png',
+  crate:     './assets/prop_crate.png',
+  door:      './assets/prop_door.png',
+  sandbag:   './assets/prop_sandbag.png',
+  catwalk:   './assets/prop_catwalk.png',
+  pipes:     './assets/prop_pipes.png',
+  container: './assets/prop_container.png',
+  cave:      './assets/prop_cave.png'
+};
+
+const SPRITES = { chars: [], weapons: [], grenades: [], fx: {}, props: {} };
+
+CHARACTERS.forEach((ch, idx) => loadTransparentSprite(ch.file, (c) => { SPRITES.chars[idx] = c; }));
+WEAPONS.forEach((wp, idx) => loadTransparentSprite(wp.file, (c) => { SPRITES.weapons[idx] = c; }));
+GRENADE_TYPES.forEach((gr, idx) => loadTransparentSprite(gr.file, (c) => { SPRITES.grenades[idx] = c; }));
+Object.entries(FX_FILES).forEach(([k, src]) => loadTransparentSprite(src, (c) => { SPRITES.fx[k] = c; }));
+Object.entries(PROP_FILES).forEach(([k, src]) => loadTransparentSprite(src, (c) => { SPRITES.props[k] = c; }));
+
+// ==========================================================================
+// 3. ANALYZED MAP CONFIGURATIONS (PLATFORMS, SPAWNS & PROPS PER MAP)
+// ==========================================================================
+const WORLD = { width: 2400, height: 1200 };
+const BORDER_PLATFORMS = [
+  { x: 0, y: 0, w: 2400, h: 30 },
+  { x: 0, y: 1160, w: 2400, h: 40 },
+  { x: 0, y: 0, w: 30, h: 1200 },
+  { x: 2370, y: 0, w: 30, h: 1200 }
+];
+
+const MAPS = [
+  {
+    id: 0, name: 'Desert Outpost', file: './assets/map1.png',
+    // Analyzed from 1000204456.png: Upper left bunker roof, right bunker roof, central trench wooden deck & desert floor
+    platforms: [
+      { x: 180, y: 495, w: 940, h: 26 },   // Left Bunker Roof
+      { x: 1760, y: 475, w: 580, h: 26 },  // Right Command Bunker Roof
+      { x: 840, y: 785, w: 710, h: 24 },   // Center Trench Wooden Deck
+      { x: 1560, y: 745, w: 520, h: 24 },  // Right Trench Wooden Bridge
+      { x: 30, y: 980, w: 2340, h: 40 }    // Desert Canyon Floor
+    ],
+    props: [
+      { kind: 'sandbag', x: 320, y: 455, w: 120, h: 42 },
+      { kind: 'crate',   x: 920, y: 735, w: 68, h: 52 },
+      { kind: 'tower',   x: 2080, y: 265, w: 150, h: 210 }
+    ],
+    spawns: [{ x: 350, y: 420 }, { x: 1950, y: 400 }, { x: 1150, y: 710 }, { x: 600, y: 900 }, { x: 1800, y: 900 }, { x: 1200, y: 900 }]
+  },
+  {
+    id: 1, name: 'Underground Bunker', file: './assets/map2.png',
+    // Analyzed from 1000204457.png: Upper-left command deck, upper-right catwalk, center grated bridge & concrete floor
+    platforms: [
+      { x: 120, y: 585, w: 1180, h: 26 },  // Left Upper Command Deck
+      { x: 1520, y: 445, w: 620, h: 22 },  // Top-Right Metal Catwalk
+      { x: 1620, y: 635, w: 680, h: 26 },  // Mid-Right Bunker Deck
+      { x: 810, y: 830, w: 840, h: 24 },   // Center Grated Catwalk
+      { x: 30, y: 1030, w: 2340, h: 40 }   // Underground Floor
+    ],
+    props: [
+      { kind: 'door',    x: 720, y: 445, w: 130, h: 140 },
+      { kind: 'pipes',   x: 1950, y: 255, w: 120, h: 190 },
+      { kind: 'crate',   x: 420, y: 535, w: 68, h: 52 }
+    ],
+    spawns: [{ x: 350, y: 510 }, { x: 1820, y: 370 }, { x: 1180, y: 750 }, { x: 450, y: 950 }, { x: 1950, y: 950 }, { x: 1200, y: 950 }]
+  },
+  {
+    id: 2, name: 'Abandoned Scrapyard', file: './assets/map3.png',
+    // Analyzed from 1000204455.png: Left hangar & brick roof, center scaffolding, right brick building & wooden walkway
+    platforms: [
+      { x: 60, y: 530, w: 580, h: 26 },    // Left Brick Building Roof
+      { x: 860, y: 555, w: 540, h: 22 },   // Center Steel Scaffolding
+      { x: 1760, y: 525, w: 580, h: 26 },  // Right Brick Building & Walkway
+      { x: 1060, y: 815, w: 560, h: 24 },  // Lower Wooden Loading Deck
+      { x: 30, y: 1020, w: 2340, h: 40 }   // Scrapyard Dirt Yard
+    ],
+    props: [
+      { kind: 'container', x: 220, y: 420, w: 180, h: 110 },
+      { kind: 'catwalk',   x: 1120, y: 755, w: 180, h: 65 },
+      { kind: 'crate',     x: 1880, y: 475, w: 68, h: 52 }
+    ],
+    spawns: [{ x: 300, y: 450 }, { x: 1120, y: 480 }, { x: 2020, y: 450 }, { x: 700, y: 940 }, { x: 1650, y: 940 }, { x: 1250, y: 740 }]
+  },
+  {
+    id: 3, name: 'Jungle River Camp', file: './assets/map4.png',
+    // Analyzed from 1000204452.png: Left stilt huts, center rope bridge, right watchtower ridge & lower river dock
+    platforms: [
+      { x: 180, y: 575, w: 420, h: 24 },   // Left Stilt Hut Deck
+      { x: 640, y: 455, w: 420, h: 24 },   // Upper-Left Hut Deck
+      { x: 1060, y: 475, w: 360, h: 20 },  // Center Suspension Rope Bridge
+      { x: 1420, y: 445, w: 820, h: 26 },  // Right Watchtower & Camp Ridge
+      { x: 1360, y: 735, w: 640, h: 24 },  // Mid-Right River Hut Deck
+      { x: 30, y: 940, w: 2340, h: 40 }    // Jungle Trail & River Bank
+    ],
+    props: [
+      { kind: 'tower',   x: 1440, y: 235, w: 140, h: 210 },
+      { kind: 'sandbag', x: 1580, y: 405, w: 120, h: 42 },
+      { kind: 'crate',   x: 340, y: 525, w: 68, h: 52 }
+    ],
+    spawns: [{ x: 360, y: 500 }, { x: 840, y: 380 }, { x: 1850, y: 370 }, { x: 1650, y: 660 }, { x: 750, y: 860 }, { x: 1250, y: 860 }]
+  },
+  {
+    id: 4, name: 'Catacombs Mine', file: './assets/map5.png',
+    // Analyzed from 1000204454.png: Left cavern ledge, center suspension bridge, right mine shack ledge & cavern floor
+    platforms: [
+      { x: 60, y: 545, w: 860, h: 26 },    // Left Cavern Shack Ledge
+      { x: 920, y: 435, w: 640, h: 20 },   // Center Cavern Rope Bridge
+      { x: 1560, y: 425, w: 440, h: 26 },  // Upper-Right Mine Shack
+      { x: 1860, y: 615, w: 480, h: 26 },  // Mid-Right Cavern Ledge
+      { x: 30, y: 990, w: 2340, h: 40 }    // Underground Mine Track Floor
+    ],
+    props: [
+      { kind: 'cave',  x: 1080, y: 810, w: 220, h: 180 },
+      { kind: 'crate', x: 260, y: 495, w: 68, h: 52 },
+      { kind: 'pipes', x: 2050, y: 435, w: 110, h: 180 }
+    ],
+    spawns: [{ x: 350, y: 470 }, { x: 1220, y: 360 }, { x: 1760, y: 350 }, { x: 550, y: 910 }, { x: 1850, y: 910 }, { x: 1200, y: 910 }]
+  },
+  {
+    id: 5, name: 'Arctic Snow Base', file: './assets/map6.png',
+    // Analyzed from 1000204453.png: Upper radar bunker roof, mid snow barracks, left cliff steel bridge & snow field
+    platforms: [
+      { x: 1520, y: 345, w: 680, h: 26 },  // Upper Radar Station Roof
+      { x: 420, y: 515, w: 880, h: 26 },   // Mid-Left Snow Barracks
+      { x: 1880, y: 615, w: 460, h: 26 },  // Right Snow Bunker Roof
+      { x: 480, y: 745, w: 780, h: 24 },   // Left Cliff Steel Bridge
+      { x: 30, y: 980, w: 2340, h: 40 }    // Snow Base Ground
+    ],
+    props: [
+      { kind: 'bunker',  x: 1620, y: 205, w: 160, h: 140 },
+      { kind: 'sandbag', x: 1920, y: 575, w: 120, h: 42 },
+      { kind: 'crate',   x: 680, y: 465, w: 68, h: 52 }
+    ],
+    spawns: [{ x: 1820, y: 270 }, { x: 750, y: 440 }, { x: 2080, y: 540 }, { x: 820, y: 670 }, { x: 1550, y: 900 }, { x: 1200, y: 900 }]
+  },
+  {
+    id: 6, name: 'Reactor Core', file: './assets/map7.png',
+    // Analyzed from 1000204451.png: Left & right upper turbine decks, center grated bridge over deep reactor pit
+    platforms: [
+      { x: 60, y: 545, w: 940, h: 26 },    // Left Turbine Deck
+      { x: 1120, y: 455, w: 1180, h: 26 }, // Back & Right Upper Turbine Deck
+      { x: 960, y: 775, w: 780, h: 22 },   // Center Grated Reactor Bridge
+      { x: 60, y: 895, w: 660, h: 26 },    // Lower-Left Platform
+      { x: 1680, y: 885, w: 660, h: 26 },  // Lower-Right Platform
+      { x: 30, y: 1120, w: 2340, h: 40 }   // Bottom Reactor Floor
+    ],
+    props: [
+      { kind: 'pipes',   x: 240, y: 355, w: 120, h: 190 },
+      { kind: 'catwalk', x: 1220, y: 715, w: 180, h: 65 },
+      { kind: 'door',    x: 2140, y: 495, w: 120, h: 140 }
+    ],
+    spawns: [{ x: 450, y: 470 }, { x: 1650, y: 380 }, { x: 1320, y: 700 }, { x: 350, y: 820 }, { x: 1950, y: 810 }, { x: 1200, y: 1040 }]
+  },
+  {
+    id: 7, name: 'Bio-Hazard Lab', file: './assets/map8.png',
+    // Analyzed from 1000204449.png: Upper U-shaped laboratory balcony & center metal bridge over toxic water pit
+    platforms: [
+      { x: 60, y: 555, w: 840, h: 26 },    // Left Cryo-Computer Balcony
+      { x: 680, y: 445, w: 1040, h: 24 },  // Back Lab Control Walkway
+      { x: 1520, y: 555, w: 820, h: 26 },  // Right Cryo-Tank Balcony
+      { x: 420, y: 835, w: 1560, h: 24 },  // Center Grated Bridge Over Pit
+      { x: 30, y: 1120, w: 2340, h: 40 }   // Lower Lab Floor
+    ],
+    props: [
+      { kind: 'door',  x: 980, y: 315, w: 120, h: 130 },
+      { kind: 'crate', x: 240, y: 505, w: 68, h: 52 },
+      { kind: 'pipes', x: 2150, y: 365, w: 110, h: 190 }
+    ],
+    spawns: [{ x: 420, y: 480 }, { x: 1180, y: 370 }, { x: 1920, y: 480 }, { x: 1180, y: 760 }, { x: 550, y: 1040 }, { x: 1850, y: 1040 }]
+  },
+  {
+    id: 8, name: 'Mountain Helipad', file: './assets/map9.png',
+    // Analyzed from 1000204450.png: Top command tent ridge, central helipad rock, left bunker & wooden cliff bridge
+    platforms: [
+      { x: 1320, y: 365, w: 720, h: 26 },  // Top Command Tent Ridge
+      { x: 960, y: 485, w: 460, h: 24 },   // Mid-Upper Bunker Ledge
+      { x: 1280, y: 635, w: 480, h: 26 },  // Helipad Landing Pad
+      { x: 340, y: 695, w: 640, h: 26 },   // Left Outpost Bunker Deck
+      { x: 940, y: 755, w: 760, h: 22 },   // Wooden Cliff Bridge
+      { x: 30, y: 1030, w: 2340, h: 40 }   // Lower Mountain Trail
+    ],
+    props: [
+      { kind: 'bunker',  x: 420, y: 555, w: 160, h: 140 },
+      { kind: 'sandbag', x: 640, y: 655, w: 120, h: 42 },
+      { kind: 'crate',   x: 1520, y: 315, w: 68, h: 52 }
+    ],
+    spawns: [{ x: 1650, y: 290 }, { x: 1500, y: 560 }, { x: 620, y: 620 }, { x: 1280, y: 680 }, { x: 750, y: 950 }, { x: 1850, y: 950 }]
+  },
+  {
+    id: 9, name: 'Maximum Prison', file: './assets/map10.png',
+    // Analyzed from 1000204448.png: 3-tier left cellblock walkways, right cellblock balcony, guard towers & yard
+    platforms: [
+      { x: 60, y: 465, w: 1040, h: 22 },   // Left Cellblock Top Tier
+      { x: 60, y: 635, w: 1040, h: 22 },   // Left Cellblock Middle Tier
+      { x: 1720, y: 495, w: 620, h: 24 },  // Right Guardhouse Roof
+      { x: 1940, y: 685, w: 420, h: 22 },  // Right Cellblock Catwalk
+      { x: 30, y: 990, w: 2340, h: 40 }    // Prison Courtyard Ground
+    ],
+    props: [
+      { kind: 'tower',   x: 960, y: 255, w: 130, h: 210 },
+      { kind: 'tower',   x: 1920, y: 285, w: 130, h: 210 },
+      { kind: 'sandbag', x: 1180, y: 950, w: 130, h: 42 }
+    ],
+    spawns: [{ x: 450, y: 390 }, { x: 450, y: 560 }, { x: 2020, y: 420 }, { x: 2120, y: 610 }, { x: 850, y: 910 }, { x: 1550, y: 910 }]
+  }
+];
+
+const MAP_IMAGES = MAPS.map((m) => {
   const img = new Image();
   img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    const c = document.createElement('canvas');
-    c.width = img.width;
-    c.height = img.height;
-    const g = c.getContext('2d');
-    g.drawImage(img, 0, 0);
-    const data = g.getImageData(0, 0, c.width, c.height);
-    const d = data.data;
-    for (let i = 0; i < d.length; i += 4) {
-      if (d[i] > 240 && d[i + 1] > 240 && d[i + 2] > 240) {
-        d[i + 3] = 0;
-      }
-    }
-    g.putImageData(data, 0, 0);
-    onReady(c);
-  };
-  img.src = src;
+  img.src = m.file;
+  return img;
+});
+
+function getActivePlatforms() {
+  const m = MAPS[state.mapId] || MAPS[0];
+  return BORDER_PLATFORMS.concat(m.platforms);
 }
 
-CHARACTERS.forEach((ch, idx) => {
-  loadTransparentSprite(ch.file, (canvasImg) => { SPRITES.chars[idx] = canvasImg; });
-});
-
-WEAPONS.forEach((wp, idx) => {
-  loadTransparentSprite(wp.file, (canvasImg) => { SPRITES.weapons[idx] = canvasImg; });
-});
-
-// Per-Weapon Audio Pool
+// ==========================================================================
+// 4. PER-WEAPON AUDIO POOL
+// ==========================================================================
 const weaponAudios = WEAPONS.map((wp) => {
   const a = new Audio(wp.sound);
   a.preload = 'auto';
@@ -91,66 +321,30 @@ function playWeaponSound(shooter, weaponIdx) {
 }
 
 // ==========================================================================
-// 2. ARENA MAP & PLATFORMS (MAX 6 PLAYERS)
+// 5. STATE, PROXIMITY VOICE CHAT & PEERJS MULTIPLAYER
 // ==========================================================================
 const MAX_PLAYERS = 6;
-const WORLD = { width: 2400, height: 1200 };
-
-const PLATFORMS = [
-  { x: 0, y: 0, w: 2400, h: 30, type: 'rock' },
-  { x: 0, y: 1150, w: 2400, h: 50, type: 'rock' },
-  { x: 0, y: 0, w: 30, h: 1200, type: 'rock' },
-  { x: 2370, y: 0, w: 30, h: 1200, type: 'rock' },
-
-  { x: 30, y: 460, w: 720, h: 36, type: 'ground' },
-  { x: 880, y: 460, w: 660, h: 36, type: 'ground' },
-  { x: 1680, y: 460, w: 690, h: 36, type: 'ground' },
-
-  { x: 220, y: 270, w: 280, h: 22, type: 'metal' },
-  { x: 1060, y: 250, w: 300, h: 22, type: 'wood' },
-  { x: 1920, y: 270, w: 280, h: 22, type: 'metal' },
-
-  { x: 260, y: 780, w: 820, h: 28, type: 'metal' },
-  { x: 1320, y: 780, w: 820, h: 28, type: 'metal' },
-  { x: 650, y: 980, w: 1100, h: 28, type: 'rock' }
-];
-
-const SPAWN_POINTS = [
-  { x: 350, y: 380 },
-  { x: 1180, y: 380 },
-  { x: 2040, y: 380 },
-  { x: 580, y: 700 },
-  { x: 1650, y: 700 },
-  { x: 1200, y: 900 }
-];
-
-// ==========================================================================
-// 3. STATE, PROXIMITY VOICE CHAT & PEERJS MULTIPLAYER
-// ==========================================================================
 const state = {
   mode: 'menu',
   isHost: true,
   roomCode: '',
+  mapId: 0,
   myId: 'p_' + Math.random().toString(36).substring(2, 7),
   myName: localStorage.getItem('do_name') || 'Soldier_' + Math.floor(100 + Math.random() * 899),
   myCharId: parseInt(localStorage.getItem('do_char') || '0', 10),
+  myGrenadeType: 0,
   players: {},
   bullets: [],
   grenades: [],
-  gasClouds: [],
-  particles: [],
+  clouds: [], // { x, y, r, life, kind: 'gas'|'smoke', ownerId }
+  fxList: [], // Visual sprite explosions, sparks, fire, dust
   killFeed: [],
   matchTime: 300,
   sniperZoom: false,
-  camera: { x: 1180, y: 420, zoom: 1 }
+  camera: { x: 1180, y: 550, zoom: 1 }
 };
 
-const voiceChat = {
-  enabled: false,
-  stream: null,
-  audioCtx: null,
-  peerGains: {}
-};
+const voiceChat = { enabled: false, stream: null, audioCtx: null, peerGains: {} };
 const MAX_VOICE_DISTANCE = 650;
 
 let peer = null;
@@ -170,7 +364,7 @@ CHARACTERS.forEach((ch) => {
     document.querySelectorAll('.char-card').forEach((el, i) => el.classList.toggle('selected', i === ch.id));
     if (state.players[state.myId]) {
       state.players[state.myId].charId = ch.id;
-      if (state.isHost) broadcastToClients({ type: 'lobby_sync', players: state.players });
+      if (state.isHost) broadcastToClients({ type: 'lobby_sync', players: state.players, mapId: state.mapId });
     }
   };
   charGridEl.appendChild(card);
@@ -185,6 +379,12 @@ WEAPONS.forEach((wp) => {
   btn.onclick = () => selectWeapon(wp.id);
   weaponBarEl.appendChild(btn);
 });
+
+const mapSelectEl = document.getElementById('mapSelect');
+mapSelectEl.onchange = (e) => {
+  state.mapId = parseInt(e.target.value, 10) || 0;
+  if (state.isHost) broadcastToClients({ type: 'lobby_sync', players: state.players, mapId: state.mapId });
+};
 
 const nameInput = document.getElementById('playerNameInput');
 nameInput.value = state.myName;
@@ -214,35 +414,21 @@ function formatClock(sec) {
   const r = (s % 60).toString().padStart(2, '0');
   return `${m}:${r}`;
 }
-
-function updateLobbyTimerLabel() {
-  document.getElementById('lobbyTimerDisplay').textContent = formatClock(state.matchTime);
-}
+function updateLobbyTimerLabel() { document.getElementById('lobbyTimerDisplay').textContent = formatClock(state.matchTime); }
 updateLobbyTimerLabel();
 
-document.getElementById('lobbyTimePlus').onclick = () => {
-  state.matchTime = Math.min(3600, state.matchTime + 60);
-  updateLobbyTimerLabel();
-};
-document.getElementById('lobbyTimeMinus').onclick = () => {
-  state.matchTime = Math.max(30, state.matchTime - 60);
-  updateLobbyTimerLabel();
-};
+document.getElementById('lobbyTimePlus').onclick = () => { state.matchTime = Math.min(3600, state.matchTime + 60); updateLobbyTimerLabel(); };
+document.getElementById('lobbyTimeMinus').onclick = () => { state.matchTime = Math.max(30, state.matchTime - 60); updateLobbyTimerLabel(); };
 
 function adjustLiveTimer(deltaSeconds) {
-  if (state.isHost) {
-    state.matchTime = Math.max(10, Math.min(3600, state.matchTime + deltaSeconds));
-  } else if (hostConn && hostConn.open) {
-    hostConn.send({ type: 'adjust_time', delta: deltaSeconds });
-  }
+  if (state.isHost) state.matchTime = Math.max(10, Math.min(3600, state.matchTime + deltaSeconds));
+  else if (hostConn && hostConn.open) hostConn.send({ type: 'adjust_time', delta: deltaSeconds });
 }
 document.getElementById('timePlusBtn').onclick = () => adjustLiveTimer(30);
 document.getElementById('timeMinusBtn').onclick = () => adjustLiveTimer(-30);
 
 const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('room')) {
-  document.getElementById('roomCodeInput').value = urlParams.get('room').toUpperCase();
-}
+if (urlParams.get('room')) document.getElementById('roomCodeInput').value = urlParams.get('room').toUpperCase();
 
 document.getElementById('installAppBtn').onclick = () => document.getElementById('installModal').classList.remove('hidden');
 document.getElementById('closeInstallModal').onclick = () => document.getElementById('installModal').classList.add('hidden');
@@ -255,14 +441,8 @@ async function toggleProximityMic() {
       if (!voiceChat.stream) {
         voiceChat.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         if (peer) {
-          Object.keys(connections).forEach((remoteId) => {
-            const call = peer.call(remoteId, voiceChat.stream);
-            attachVoiceCall(call);
-          });
-          if (!state.isHost && hostConn && hostConn.peer) {
-            const call = peer.call(hostConn.peer, voiceChat.stream);
-            attachVoiceCall(call);
-          }
+          Object.keys(connections).forEach((remoteId) => attachVoiceCall(peer.call(remoteId, voiceChat.stream)));
+          if (!state.isHost && hostConn && hostConn.peer) attachVoiceCall(peer.call(hostConn.peer, voiceChat.stream));
         }
       }
       voiceChat.stream.getAudioTracks().forEach((t) => { t.enabled = true; });
@@ -272,9 +452,7 @@ async function toggleProximityMic() {
       alert('Microphone permission is required for voice chat.');
     }
   } else {
-    if (voiceChat.stream) {
-      voiceChat.stream.getAudioTracks().forEach((t) => { t.enabled = false; });
-    }
+    if (voiceChat.stream) voiceChat.stream.getAudioTracks().forEach((t) => { t.enabled = false; });
     voiceChat.enabled = false;
     btn.textContent = '🎙️ MIC: OFF';
   }
@@ -283,18 +461,12 @@ async function toggleProximityMic() {
 function attachVoiceCall(call) {
   if (!call) return;
   call.on('stream', (remoteStream) => {
-    if (!voiceChat.audioCtx) {
-      voiceChat.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    if (!voiceChat.audioCtx) voiceChat.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const source = voiceChat.audioCtx.createMediaStreamSource(remoteStream);
     const gainNode = voiceChat.audioCtx.createGain();
     gainNode.gain.value = 1.0;
-
     const audioEl = new Audio();
-    audioEl.srcObject = remoteStream;
-    audioEl.autoplay = true;
-    audioEl.muted = true;
-
+    audioEl.srcObject = remoteStream; audioEl.autoplay = true; audioEl.muted = true;
     source.connect(gainNode);
     gainNode.connect(voiceChat.audioCtx.destination);
     voiceChat.peerGains[call.peer] = gainNode;
@@ -314,19 +486,16 @@ function updateProximityVoiceVolumes() {
   if (!me) return;
   Object.entries(voiceChat.peerGains).forEach(([peerId, gainNode]) => {
     const other = state.players[peerId];
-    if (!other || other.hp <= 0) {
-      gainNode.gain.value = 0;
-      return;
-    }
+    if (!other || other.hp <= 0) { gainNode.gain.value = 0; return; }
     const dist = Math.hypot(other.x - me.x, other.y - me.y);
     gainNode.gain.value = Math.max(0, Math.min(1, 1 - dist / MAX_VOICE_DISTANCE));
   });
 }
-
 document.getElementById('toggleMicBtn').onclick = toggleProximityMic;
 
 function createPlayer(id, name, charId, isBot = false, spawnIdx = 0) {
-  const sp = SPAWN_POINTS[spawnIdx % SPAWN_POINTS.length];
+  const activeMap = MAPS[state.mapId] || MAPS[0];
+  const sp = activeMap.spawns[spawnIdx % activeMap.spawns.length];
   return {
     id, name, charId, isBot,
     x: sp.x, y: sp.y,
@@ -371,7 +540,7 @@ document.getElementById('createRoomBtn').onclick = () => {
         delete state.players[conn.playerId];
         delete connections[conn.playerId];
         updateLobbyPlayersUI();
-        broadcastToClients({ type: 'lobby_sync', players: state.players });
+        broadcastToClients({ type: 'lobby_sync', players: state.players, mapId: state.mapId });
       }
     });
   });
@@ -391,10 +560,7 @@ document.getElementById('joinRoomBtn').onclick = () => {
     hostConn.on('open', () => {
       document.getElementById('connectionStatus').textContent = 'Joined! Waiting for Host to start...';
       hostConn.send({ type: 'join', id: state.myId, name: state.myName, charId: state.myCharId });
-      if (voiceChat.stream) {
-        const call = peer.call(hostConn.peer, voiceChat.stream);
-        attachVoiceCall(call);
-      }
+      if (voiceChat.stream) attachVoiceCall(peer.call(hostConn.peer, voiceChat.stream));
     });
     hostConn.on('data', (msg) => handleClientReceive(msg));
   });
@@ -448,10 +614,13 @@ document.getElementById('whatsappShareBtn').onclick = () => {
 };
 
 document.getElementById('startMatchBtn').onclick = () => {
-  if (document.getElementById('fillBotsCheck').checked) {
-    addBotsUpTo(MAX_PLAYERS);
-  }
-  broadcastToClients({ type: 'start', players: state.players, roomCode: state.roomCode, matchTime: state.matchTime });
+  if (document.getElementById('fillBotsCheck').checked) addBotsUpTo(MAX_PLAYERS);
+  // Re-align spawn points to the chosen map
+  Object.values(state.players).forEach((p, idx) => {
+    const sp = (MAPS[state.mapId] || MAPS[0]).spawns[idx % 6];
+    p.x = sp.x; p.y = sp.y;
+  });
+  broadcastToClients({ type: 'start', players: state.players, roomCode: state.roomCode, matchTime: state.matchTime, mapId: state.mapId });
   startMatch();
 };
 
@@ -462,21 +631,18 @@ function handleHostReceive(conn, msg) {
     conn.playerId = msg.id;
     connections[msg.id] = conn;
     state.players[msg.id] = createPlayer(msg.id, msg.name, msg.charId, false, count);
-    if (voiceChat.stream) {
-      const call = peer.call(conn.peer, voiceChat.stream);
-      attachVoiceCall(call);
-    }
+    if (voiceChat.stream) attachVoiceCall(peer.call(conn.peer, voiceChat.stream));
     updateLobbyPlayersUI();
-    broadcastToClients({ type: 'lobby_sync', players: state.players });
+    broadcastToClients({ type: 'lobby_sync', players: state.players, mapId: state.mapId });
     if (state.mode === 'playing') {
-      conn.send({ type: 'start', players: state.players, roomCode: state.roomCode, matchTime: state.matchTime });
+      conn.send({ type: 'start', players: state.players, roomCode: state.roomCode, matchTime: state.matchTime, mapId: state.mapId });
     }
   } else if (msg.type === 'input') {
     const p = state.players[msg.id];
     if (p) {
       p.remoteInput = msg.input;
       if (typeof msg.weaponIdx === 'number') p.weaponIdx = msg.weaponIdx;
-      if (msg.throwGrenade) spawnGrenade(p);
+      if (msg.throwGrenade) spawnGrenade(p, msg.grenadeType ?? 0);
     }
   } else if (msg.type === 'adjust_time') {
     state.matchTime = Math.max(10, Math.min(3600, state.matchTime + msg.delta));
@@ -486,6 +652,8 @@ function handleHostReceive(conn, msg) {
 function handleClientReceive(msg) {
   if (msg.type === 'lobby_sync') {
     state.players = msg.players;
+    state.mapId = msg.mapId || 0;
+    mapSelectEl.value = String(state.mapId);
     document.getElementById('waitingRoom').classList.remove('hidden');
     document.getElementById('displayRoomCode').textContent = state.roomCode;
     document.getElementById('startMatchBtn').classList.add('hidden');
@@ -494,14 +662,17 @@ function handleClientReceive(msg) {
     state.players = msg.players;
     state.roomCode = msg.roomCode;
     state.matchTime = msg.matchTime;
+    state.mapId = msg.mapId || 0;
     startMatch();
   } else if (msg.type === 'state') {
     state.players = msg.players;
     state.bullets = msg.bullets;
     state.grenades = msg.grenades;
-    state.gasClouds = msg.gasClouds;
+    state.clouds = msg.clouds;
+    state.fxList = msg.fxList;
     state.killFeed = msg.killFeed;
     state.matchTime = msg.matchTime;
+    state.mapId = msg.mapId || 0;
   }
 }
 
@@ -510,7 +681,7 @@ function broadcastToClients(payload) {
 }
 
 // ==========================================================================
-// 4. INPUTS (PC KEYBOARD/MOUSE + MOBILE DUAL JOYSTICKS)
+// 6. INPUTS (PC KEYBOARD/MOUSE + MOBILE DUAL JOYSTICKS & GRENADE SELECTOR)
 // ==========================================================================
 const input = { moveX: 0, moveY: 0, aimX: 1, aimY: 0, shooting: false };
 const keys = {};
@@ -529,6 +700,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Digit9') selectWeapon(8);
   if (e.code === 'Digit0') selectWeapon(9);
   if (e.code === 'KeyQ') cycleWeapon();
+  if (e.code === 'KeyF') cycleGrenadeType();
   if (e.code === 'KeyG' || e.code === 'KeyE') triggerGrenade();
   if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') state.sniperZoom = !state.sniperZoom;
   if (e.code === 'Tab') { e.preventDefault(); toggleScoreboard(); }
@@ -609,6 +781,7 @@ bindVirtualStick('rightStickZone', 'rightKnob', (nx, ny) => {
 
 document.getElementById('btnSwap').onclick = cycleWeapon;
 document.getElementById('btnGrenade').onclick = triggerGrenade;
+document.getElementById('btnGrenadeType').onclick = cycleGrenadeType;
 document.getElementById('btnZoom').onclick = () => { state.sniperZoom = !state.sniperZoom; };
 document.getElementById('toggleScoreboardBtn').onclick = toggleScoreboard;
 document.getElementById('closeSbBtn').onclick = toggleScoreboard;
@@ -630,11 +803,19 @@ function cycleWeapon() {
   if (me) selectWeapon((me.weaponIdx + 1) % WEAPONS.length);
 }
 
+function cycleGrenadeType() {
+  state.myGrenadeType = (state.myGrenadeType + 1) % GRENADE_TYPES.length;
+  const gInfo = GRENADE_TYPES[state.myGrenadeType];
+  document.getElementById('btnGrenadeType').innerHTML = `${gInfo.label}<small>TYPE</small>`;
+}
+
 function triggerGrenade() {
   const me = state.players[state.myId];
   if (!me || me.hp <= 0) return;
-  if (state.isHost) spawnGrenade(me);
-  else if (hostConn && hostConn.open) hostConn.send({ type: 'input', id: state.myId, input, throwGrenade: true });
+  if (state.isHost) spawnGrenade(me, state.myGrenadeType);
+  else if (hostConn && hostConn.open) {
+    hostConn.send({ type: 'input', id: state.myId, input, throwGrenade: true, grenadeType: state.myGrenadeType });
+  }
 }
 
 function toggleScoreboard() {
@@ -662,8 +843,12 @@ function renderScoreboard() {
 }
 
 // ==========================================================================
-// 5. SIMULATION, PER-WEAPON AUDIO & 10 WEAPONS / SHIELD / MEDKIT MECHANICS
+// 7. SIMULATION, 3 GRENADE TYPES & SPRITE EFFECTS ENGINE
 // ==========================================================================
+function addFxSprite(fxKey, x, y, size, life) {
+  state.fxList.push({ fxKey, x, y, size, life, maxLife: life });
+}
+
 function startMatch() {
   state.mode = 'playing';
   document.getElementById('lobbyScreen').classList.add('hidden');
@@ -701,8 +886,8 @@ function gameLoop(now) {
     stepHostSimulation(dt, now);
     broadcastToClients({
       type: 'state', players: state.players, bullets: state.bullets,
-      grenades: state.grenades, gasClouds: state.gasClouds,
-      killFeed: state.killFeed, matchTime: state.matchTime
+      grenades: state.grenades, clouds: state.clouds, fxList: state.fxList,
+      killFeed: state.killFeed, matchTime: state.matchTime, mapId: state.mapId
     });
   } else if (hostConn && hostConn.open) {
     hostConn.send({ type: 'input', id: state.myId, input });
@@ -717,12 +902,14 @@ function gameLoop(now) {
 
 function stepHostSimulation(dt, now) {
   state.matchTime = Math.max(0, state.matchTime - dt);
+  const platforms = getActivePlatforms();
+  const activeMap = MAPS[state.mapId] || MAPS[0];
 
   Object.values(state.players).forEach((p, idx) => {
     if (p.hp <= 0) {
       p.deadTimer -= dt;
       if (p.deadTimer <= 0) {
-        const sp = SPAWN_POINTS[(idx + Math.floor(Math.random() * 6)) % SPAWN_POINTS.length];
+        const sp = activeMap.spawns[(idx + Math.floor(Math.random() * 6)) % activeMap.spawns.length];
         p.x = sp.x; p.y = sp.y; p.vx = 0; p.vy = 0; p.hp = 100;
       }
       return;
@@ -737,12 +924,8 @@ function stepHostSimulation(dt, now) {
       p.vy += ctrl.moveY * 1450 * dt;
       p.vy = Math.max(p.vy, -460);
       p.jetpacking = true;
-      if (Math.random() < 0.5) {
-        state.particles.push({
-          x: p.x - p.facing * 14, y: p.y + 18,
-          vx: (Math.random() - 0.5) * 60, vy: 130,
-          life: 0.3, color: Math.random() < 0.5 ? '#f97316' : '#cbd5e1', r: 6
-        });
+      if (Math.random() < 0.35) {
+        addFxSprite('fire', p.x - p.facing * 14, p.y + 24, 34, 0.18);
       }
     } else {
       p.jetpacking = false;
@@ -751,16 +934,17 @@ function stepHostSimulation(dt, now) {
 
     p.aimAngle = Math.atan2(ctrl.aimY, ctrl.aimX);
     p.facing = Math.cos(p.aimAngle) >= 0 ? 1 : -1;
-    moveAndCollide(p, dt);
+    moveAndCollide(p, dt, platforms);
 
     if (ctrl.shooting) fireWeapon(p, now);
   });
 
+  // Bullets & Rockets
   for (let i = state.bullets.length - 1; i >= 0; i--) {
     const b = state.bullets[i];
     b.x += b.vx; b.y += b.vy; b.life -= dt;
 
-    const hitWall = PLATFORMS.some((pl) => b.x > pl.x && b.x < pl.x + pl.w && b.y > pl.y && b.y < pl.y + pl.h);
+    const hitWall = platforms.some((pl) => b.x > pl.x && b.x < pl.x + pl.w && b.y > pl.y && b.y < pl.y + pl.h);
     let hitPlayer = null;
 
     for (const p of Object.values(state.players)) {
@@ -768,7 +952,7 @@ function stepHostSimulation(dt, now) {
         const activeW = WEAPONS[p.weaponIdx];
         const bulletFromFront = Math.cos(p.aimAngle) * b.vx < 0;
         if (activeW && activeW.type === 'shield' && bulletFromFront) {
-          state.particles.push({ x: b.x, y: b.y, vx: (Math.random() - 0.5) * 140, vy: -80, life: 0.25, color: '#38bdf8', r: 5 });
+          addFxSprite('sparks', b.x, b.y, 44, 0.22);
           hitPlayer = 'BLOCKED';
         } else {
           hitPlayer = p;
@@ -778,48 +962,70 @@ function stepHostSimulation(dt, now) {
     }
 
     if (hitWall || hitPlayer || b.life <= 0) {
-      if (b.type === 'rocket') explodeRocket(b.x, b.y, b.ownerId);
-      else if (hitPlayer && hitPlayer !== 'BLOCKED') damagePlayer(hitPlayer, b.damage, b.ownerId, b.weaponName);
+      if (b.type === 'rocket') {
+        explodeBlast(b.x, b.y, b.ownerId, 135, 95, 'ROCKET RPG');
+      } else if (hitPlayer && hitPlayer !== 'BLOCKED') {
+        addFxSprite('sparks', b.x, b.y, 38, 0.2);
+        damagePlayer(hitPlayer, b.damage, b.ownerId, b.weaponName);
+      } else if (hitWall) {
+        addFxSprite('dust', b.x, b.y, 34, 0.22);
+      }
       state.bullets.splice(i, 1);
     }
   }
 
+  // 3 Grenade Types: 0 = Frag Explosion, 1 = Green Toxic Gas, 2 = Tactical White Smoke Screen
   for (let i = state.grenades.length - 1; i >= 0; i--) {
     const g = state.grenades[i];
     g.vy += 850 * dt; g.x += g.vx * dt; g.y += g.vy * dt; g.fuse -= dt;
-    for (const pl of PLATFORMS) {
+    for (const pl of platforms) {
       if (g.x > pl.x && g.x < pl.x + pl.w && g.y > pl.y && g.y < pl.y + pl.h) {
         g.vy *= -0.45; g.vx *= 0.7; g.y = pl.y - 4;
       }
     }
     if (g.fuse <= 0) {
-      state.gasClouds.push({ x: g.x, y: g.y, r: 120, life: 6.5, ownerId: g.ownerId });
+      if (g.gType === 0) {
+        explodeBlast(g.x, g.y, g.ownerId, 150, 100, 'FRAG GRENADE');
+      } else if (g.gType === 1) {
+        state.clouds.push({ x: g.x, y: g.y, r: 135, life: 7.0, kind: 'gas', ownerId: g.ownerId });
+      } else {
+        state.clouds.push({ x: g.x, y: g.y, r: 165, life: 9.0, kind: 'smoke', ownerId: g.ownerId });
+      }
       state.grenades.splice(i, 1);
     }
   }
 
-  for (let i = state.gasClouds.length - 1; i >= 0; i--) {
-    const gc = state.gasClouds[i];
-    gc.life -= dt;
-    Object.values(state.players).forEach((p) => {
-      if (p.hp > 0 && Math.hypot(p.x - gc.x, p.y - gc.y) < gc.r) {
-        damagePlayer(p, 26 * dt, gc.ownerId, 'GAS GRENADE');
-      }
-    });
-    if (gc.life <= 0) state.gasClouds.splice(i, 1);
+  // Gas & Smoke Clouds
+  for (let i = state.clouds.length - 1; i >= 0; i--) {
+    const cl = state.clouds[i];
+    cl.life -= dt;
+    if (cl.kind === 'gas') {
+      Object.values(state.players).forEach((p) => {
+        if (p.hp > 0 && Math.hypot(p.x - cl.x, p.y - cl.y) < cl.r) {
+          damagePlayer(p, 28 * dt, cl.ownerId, 'GREEN GAS');
+        }
+      });
+    }
+    if (cl.life <= 0) state.clouds.splice(i, 1);
+  }
+
+  // Update Visual Effect Timers
+  for (let i = state.fxList.length - 1; i >= 0; i--) {
+    state.fxList[i].life -= dt;
+    if (state.fxList[i].life <= 0) state.fxList.splice(i, 1);
   }
 }
 
-function moveAndCollide(p, dt) {
+function moveAndCollide(p, dt, platforms) {
   const hw = 18, hh = 30;
   p.x += p.vx * dt;
-  for (const pl of PLATFORMS) {
+  for (const pl of platforms) {
     if (p.x + hw > pl.x && p.x - hw < pl.x + pl.w && p.y + hh > pl.y && p.y - hh < pl.y + pl.h) {
       p.x = p.vx > 0 ? pl.x - hw : pl.x + pl.w + hw;
     }
   }
   p.y += p.vy * dt;
-  for (const pl of PLATFORMS) {
+  for (const pl of platforms) {
     if (p.x + hw > pl.x && p.x - hw < pl.x + pl.w && p.y + hh > pl.y && p.y - hh < pl.y + pl.h) {
       if (p.vy > 0) { p.y = pl.y - hh; p.vy = 0; }
       else if (p.vy < 0) { p.y = pl.y + pl.h + hh; p.vy = 0; }
@@ -835,12 +1041,14 @@ function fireWeapon(p, now) {
 
   if (w.type === 'heal') {
     p.hp = Math.min(p.maxHp, p.hp + 35);
+    addFxSprite('sparks', p.x, p.y, 64, 0.35);
     return;
   }
 
   if (w.type === 'shield' || w.type === 'melee') {
     const rx = p.x + Math.cos(p.aimAngle) * 40;
     const ry = p.y + Math.sin(p.aimAngle) * 40;
+    if (w.type === 'melee') addFxSprite('sparks', rx, ry, 42, 0.16);
     Object.values(state.players).forEach((t) => {
       if (t.id !== p.id && t.hp > 0 && Math.hypot(t.x - rx, t.y - ry) < 42) {
         damagePlayer(t, w.damage, p.id, w.name);
@@ -849,12 +1057,15 @@ function fireWeapon(p, now) {
     return;
   }
 
+  const mx = p.x + Math.cos(p.aimAngle) * 30;
+  const my = p.y + Math.sin(p.aimAngle) * 30;
+  addFxSprite('muzzle', mx, my, 36, 0.12);
+
   for (let i = 0; i < w.count; i++) {
     const offset = w.count === 2 ? (i === 0 ? -5 : 5) : 0;
     const ang = p.aimAngle + (Math.random() - 0.5) * w.spread;
     state.bullets.push({
-      x: p.x + Math.cos(p.aimAngle) * 26,
-      y: p.y + Math.sin(p.aimAngle) * 26 + offset,
+      x: mx, y: my + offset,
       vx: Math.cos(ang) * w.speed,
       vy: Math.sin(ang) * w.speed,
       damage: w.damage,
@@ -867,26 +1078,24 @@ function fireWeapon(p, now) {
   }
 }
 
-function spawnGrenade(p) {
+function spawnGrenade(p, gType = 0) {
   const now = performance.now();
   if (now - p.lastGrenade < 420) return;
   p.lastGrenade = now;
   state.grenades.push({
     x: p.x + p.facing * 20, y: p.y - 8,
     vx: Math.cos(p.aimAngle) * 560, vy: Math.sin(p.aimAngle) * 560 - 140,
-    fuse: 1.5, ownerId: p.id
+    fuse: 1.5, gType, ownerId: p.id
   });
 }
 
-function explodeRocket(x, y, ownerId) {
-  for (let i = 0; i < 16; i++) {
-    const a = Math.random() * Math.PI * 2, sp = 80 + Math.random() * 200;
-    state.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.45, color: i % 2 === 0 ? '#f97316' : '#facc15', r: 9 });
-  }
+function explodeBlast(x, y, ownerId, radius, maxDmg, label) {
+  addFxSprite('explosion', x, y, radius * 1.45, 0.45);
+  addFxSprite('dust', x, y + 18, radius * 1.3, 0.55);
   Object.values(state.players).forEach((p) => {
     if (p.hp > 0) {
       const d = Math.hypot(p.x - x, p.y - y);
-      if (d < 130) damagePlayer(p, Math.round(95 * (1 - d / 130)), ownerId, 'ROCKET RPG');
+      if (d < radius) damagePlayer(p, Math.round(maxDmg * (1 - d / radius)), ownerId, label);
     }
   });
 }
@@ -896,6 +1105,7 @@ function damagePlayer(target, amount, attackerId, weaponName) {
   target.hp -= amount;
   if (target.hp <= 0) {
     target.hp = 0; target.deaths += 1; target.deadTimer = 3.0;
+    addFxSprite('explosion', target.x, target.y, 110, 0.4);
     const attacker = state.players[attackerId];
     if (attacker && attacker.id !== target.id) {
       attacker.kills += 1;
@@ -929,7 +1139,7 @@ function computeBotAI(bot, dt) {
 }
 
 // ==========================================================================
-// 6. CAMERA & CANVAS RENDERING
+// 8. CAMERA & MULTI-MAP / PROPS / GRENADE / FX RENDERING
 // ==========================================================================
 function updateCamera() {
   const me = state.players[state.myId];
@@ -941,7 +1151,7 @@ function updateCamera() {
 }
 
 function renderGame() {
-  ctx.fillStyle = '#1c211d';
+  ctx.fillStyle = '#141815';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.save();
@@ -949,54 +1159,72 @@ function renderGame() {
   ctx.scale(state.camera.zoom, state.camera.zoom);
   ctx.translate(-state.camera.x, -state.camera.y);
 
-  ctx.fillStyle = '#252b26';
-  ctx.fillRect(0, 0, WORLD.width, 470);
-  ctx.fillStyle = '#1b1817';
-  ctx.fillRect(0, 470, WORLD.width, WORLD.height - 470);
-
-  for (const pl of PLATFORMS) {
-    ctx.fillStyle = pl.type === 'metal' ? '#52585c' : pl.type === 'wood' ? '#7c5233' : pl.type === 'ground' ? '#57534e' : '#292524';
-    ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
-    ctx.strokeStyle = '#0e110f'; ctx.lineWidth = 3;
-    ctx.strokeRect(pl.x, pl.y, pl.w, pl.h);
-    if (pl.type === 'ground') {
-      ctx.fillStyle = '#4d7c0f';
-      ctx.fillRect(pl.x, pl.y, pl.w, 8);
-    }
+  // 1. Draw Selected Map Image
+  const activeMap = MAPS[state.mapId] || MAPS[0];
+  const mapImg = MAP_IMAGES[state.mapId];
+  if (mapImg && mapImg.complete && mapImg.naturalWidth > 0) {
+    ctx.drawImage(mapImg, 0, 0, WORLD.width, WORLD.height);
+  } else {
+    ctx.fillStyle = '#242b25';
+    ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+    ctx.fillStyle = '#57534e';
+    activeMap.platforms.forEach((pl) => ctx.fillRect(pl.x, pl.y, pl.w, pl.h));
   }
 
-  for (const gc of state.gasClouds) {
-    const grad = ctx.createRadialGradient(gc.x, gc.y, 10, gc.x, gc.y, gc.r);
-    grad.addColorStop(0, 'rgba(34, 197, 94, 0.7)');
-    grad.addColorStop(1, 'rgba(22, 163, 74, 0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath(); ctx.arc(gc.x, gc.y, gc.r, 0, Math.PI * 2); ctx.fill();
-  }
+  // 2. Draw Map-Specific Props (Bunkers, Watchtowers, Crates, Sandbags, Pipes, Containers)
+  (activeMap.props || []).forEach((pr) => {
+    const pSprite = SPRITES.props[pr.kind];
+    if (pSprite) ctx.drawImage(pSprite, pr.x, pr.y, pr.w, pr.h);
+  });
 
-  for (const g of state.grenades) {
-    ctx.fillStyle = '#22c55e';
-    ctx.beginPath(); ctx.arc(g.x, g.y, 7, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.stroke();
-  }
-
-  for (let i = state.particles.length - 1; i >= 0; i--) {
-    const pt = state.particles[i];
-    pt.x += pt.vx * 0.016; pt.y += pt.vy * 0.016; pt.life -= 0.016;
-    ctx.fillStyle = pt.color;
-    ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r * Math.max(0, pt.life * 2), 0, Math.PI * 2); ctx.fill();
-    if (pt.life <= 0) state.particles.splice(i, 1);
-  }
-
+  // 3. Draw Soldiers & Equipped Weapons
   Object.values(state.players).forEach((p) => {
     if (p.hp <= 0) return;
     drawCharacterAndWeapon(p);
   });
 
+  // 4. Draw Thrown Grenades (Frag / Green Gas / Smoke Canister)
+  for (const g of state.grenades) {
+    const gSprite = SPRITES.grenades[g.gType];
+    if (gSprite) {
+      ctx.drawImage(gSprite, g.x - 12, g.y - 14, 24, 28);
+    } else {
+      ctx.fillStyle = g.gType === 1 ? '#22c55e' : g.gType === 2 ? '#cbd5e1' : '#4b5563';
+      ctx.beginPath(); ctx.arc(g.x, g.y, 7, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // 5. Draw Bullets & Rockets
   for (const b of state.bullets) {
     ctx.fillStyle = b.color;
     ctx.beginPath();
     ctx.arc(b.x, b.y, b.type === 'rocket' ? 8 : 4.5, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  // 6. Draw Green Toxic Gas Clouds & White Tactical Smoke Screens
+  for (const cl of state.clouds) {
+    const cSprite = cl.kind === 'gas' ? SPRITES.fx.smokeGreen : SPRITES.fx.smokeWhite;
+    ctx.save();
+    ctx.globalAlpha = Math.min(0.92, cl.life * 0.45);
+    if (cSprite) {
+      ctx.drawImage(cSprite, cl.x - cl.r, cl.y - cl.r * 0.85, cl.r * 2, cl.r * 1.6);
+    } else {
+      ctx.fillStyle = cl.kind === 'gas' ? 'rgba(34,197,94,0.6)' : 'rgba(226,232,240,0.75)';
+      ctx.beginPath(); ctx.arc(cl.x, cl.y, cl.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 7. Draw Explosion, Fire, Sparks & Dust FX Sprites
+  for (const fx of state.fxList) {
+    const fSprite = SPRITES.fx[fx.fxKey];
+    if (fSprite) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, fx.life / fx.maxLife);
+      ctx.drawImage(fSprite, fx.x - fx.size / 2, fx.y - fx.size / 2, fx.size, fx.size);
+      ctx.restore();
+    }
   }
 
   ctx.restore();
@@ -1017,15 +1245,6 @@ function drawCharacterAndWeapon(p) {
   ctx.fillRect(-22, -38, 44, 5);
   ctx.fillStyle = p.hp > 35 ? '#22c55e' : '#ef4444';
   ctx.fillRect(-22, -38, 44 * (p.hp / p.maxHp), 5);
-
-  if (p.jetpacking) {
-    ctx.fillStyle = '#f97316';
-    ctx.beginPath();
-    ctx.moveTo(-p.facing * 12, 22);
-    ctx.lineTo(-p.facing * 18, 38 + Math.random() * 8);
-    ctx.lineTo(-p.facing * 6, 22);
-    ctx.fill();
-  }
 
   const charImg = SPRITES.chars[p.charId];
   ctx.save();
@@ -1056,9 +1275,10 @@ function drawCharacterAndWeapon(p) {
 function updateHudUI() {
   const me = state.players[state.myId];
   if (!me) return;
+  const activeMap = MAPS[state.mapId] || MAPS[0];
   document.getElementById('healthBar').style.width = `${Math.max(0, me.hp)}%`;
   document.getElementById('hpText').textContent = `HP ${Math.ceil(me.hp)}`;
-  document.getElementById('matchScore').textContent = `KILLS: ${me.kills} • PLAYERS: ${Object.keys(state.players).length}/${MAX_PLAYERS}`;
+  document.getElementById('matchScore').textContent = `${activeMap.name.toUpperCase()} • KILLS: ${me.kills} • ${Object.keys(state.players).length}/${MAX_PLAYERS}`;
   document.getElementById('matchTimer').textContent = formatClock(state.matchTime);
   document.getElementById('killFeed').innerHTML = state.killFeed.map((item) => `<div class="kill-item">${item}</div>`).join('');
 }
