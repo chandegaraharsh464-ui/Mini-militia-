@@ -488,3 +488,23 @@ input[type="text"] {
 .btn-gas { border-color: #22c55e; }
 .btn-zoom { border-color: #38bdf8; }
 .btn-swap { border-color: #facc15; }
+/* Allow vertical finger scrolling inside the lobby card on phones */
+.overlay, .lobby-card {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+/* Compact phone landscape layout so Start/Create buttons are always visible */
+@media (max-height: 500px) {
+  .overlay { align-items: flex-start; padding: 6px; }
+  .lobby-card { padding: 10px 12px; max-height: 96vh; }
+  .lobby-header { margin-bottom: 6px; }
+  .lobby-header h1 { font-size: 18px; }
+  .subtitle { display: none; }
+  .player-setup { padding: 5px 8px; margin-bottom: 6px; }
+  .char-section { padding: 6px; margin-bottom: 6px; }
+  .char-card { padding: 3px 2px; }
+  .char-card img { width: 32px; height: 32px; }
+  .char-name { font-size: 8px; margin-top: 2px; }
+  .panel { padding: 7px; gap: 5px; }
+  .btn { padding: 7px 10px; font-size: 11px; }
+}
